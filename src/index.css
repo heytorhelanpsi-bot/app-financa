@@ -73,6 +73,29 @@ body,
   min-height: 100%;
 }
 
+html {
+  /* Não deixar o navegador aumentar o texto ao girar o celular. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Nada pode ficar mais largo que a tela (evita zoom para fora / rolagem lateral). */
+body {
+  overflow-x: clip;
+}
+
+/*
+ * iOS amplia a página ao focar um campo com fonte menor que 16px e não desfaz o
+ * zoom depois. No celular, todo campo de digitação usa 16px.
+ */
+@media (max-width: 639px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='color']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 body {
   @apply bg-bg font-sans text-fg antialiased;
   -webkit-tap-highlight-color: transparent;
