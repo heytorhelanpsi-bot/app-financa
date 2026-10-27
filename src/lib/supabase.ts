@@ -1,7 +1,21 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+/**
+ * Aceita a URL do projeto mesmo que tenha sido copiada com caminho
+ * (ex.: "https://xxx.supabase.co/rest/v1/") ou com espaços: usa só a origem.
+ */
+export function normalizeSupabaseUrl(raw: string | undefined): string | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+const url = normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL as string | undefined);
+const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim();
 
 export const isSupabaseConfigured = Boolean(url && anonKey);
 
