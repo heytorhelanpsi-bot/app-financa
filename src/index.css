@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 244 245 247;
+  --surface: 255 255 255;
+  --surface-2: 236 238 241;
+  --line: 218 221 226;
+  --fg: 24 27 32;
+  --muted: 100 106 115;
+  --expense: 220 20 60;
+  --expense-forecast: 214 120 40;
+  --income: 0 160 80;
+  --income-forecast: 70 150 100;
+  --accent: 40 110 220;
+  --warn: 200 130 0;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 18 20 23;
+  --surface: 28 31 36;
+  --surface-2: 38 42 48;
+  --line: 52 57 64;
+  --fg: 235 237 240;
+  --muted: 150 156 166;
+  --expense: 255 59 92;
+  --expense-forecast: 245 166 100;
+  --income: 57 255 136;
+  --income-forecast: 140 214 168;
+  --accent: 110 168 255;
+  --warn: 255 196 0;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-bg text-fg antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface p-4;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-fg placeholder:text-muted
+      focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-muted;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-accent/90 dark:text-bg;
+  }
+  .btn-secondary {
+    @apply btn border border-line bg-surface-2 text-fg hover:bg-line/60;
+  }
+  .btn-danger {
+    @apply btn bg-expense text-white hover:bg-expense/90;
+  }
+  .btn-ghost {
+    @apply btn text-muted hover:bg-surface-2 hover:text-fg;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line px-3 py-1 text-xs font-medium text-muted transition hover:text-fg;
+  }
+  .chip-active {
+    @apply border-accent bg-accent/15 text-fg;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
