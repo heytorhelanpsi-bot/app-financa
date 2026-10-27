@@ -56,7 +56,7 @@ export function SyncProvider({ userId, children }: { userId: string; children: R
     };
 
     const channel = supabase.channel(`sync:${userId}`);
-    for (const table of ['transactions', 'accounts', 'categories']) {
+    for (const table of ['transactions', 'accounts', 'categories', 'debts', 'debt_payments', 'debt_charges']) {
       channel.on(
         'postgres_changes',
         { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` },

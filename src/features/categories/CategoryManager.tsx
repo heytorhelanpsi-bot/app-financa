@@ -37,8 +37,8 @@ export function CategoryManager() {
     );
 
   const row = (c: Category, list: Category[], idx: number, child = false) => (
-    <li key={c.id} className={`flex items-center gap-2 py-2 ${child ? 'pl-6' : ''} ${c.is_active ? '' : 'opacity-60'}`}>
-      <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: c.color ?? 'rgb(var(--line))' }} aria-hidden />
+    <li key={c.id} className={`flex items-center gap-2 py-2.5 ${child ? 'pl-7' : ''} ${c.is_active ? '' : 'opacity-60'}`}>
+      <span className="dot h-2.5 w-2.5" style={{ background: c.color ?? 'rgb(var(--line))' }} aria-hidden />
       <span className="min-w-0 flex-1 truncate text-sm">
         {child && '↳ '}
         {c.name}{' '}
@@ -54,12 +54,12 @@ export function CategoryManager() {
       </button>
       <details className="relative">
         <summary className="btn-ghost cursor-pointer list-none px-2 py-1 text-xs">Ações</summary>
-        <div className="absolute right-0 z-10 mt-1 flex w-44 flex-col rounded-lg border border-line bg-surface p-1 shadow-lg">
-          <button className="rounded px-3 py-1.5 text-left text-sm hover:bg-surface-2" onClick={() => setEditing({ open: true, category: c })}>Editar</button>
+        <div className="absolute right-0 z-10 mt-1 flex w-48 flex-col rounded-xl border border-line bg-surface p-1 shadow-2xl">
+          <button className="rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-2" onClick={() => setEditing({ open: true, category: c })}>Editar</button>
           {!child && (
-            <button className="rounded px-3 py-1.5 text-left text-sm hover:bg-surface-2" onClick={() => setEditing({ open: true, parentId: c.id })}>Nova subcategoria</button>
+            <button className="rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-2" onClick={() => setEditing({ open: true, parentId: c.id })}>Nova subcategoria</button>
           )}
-          <button className="rounded px-3 py-1.5 text-left text-sm hover:bg-surface-2" onClick={() => toggleActive(c)}>{c.is_active ? 'Desativar' : 'Reativar'}</button>
+          <button className="rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-2" onClick={() => toggleActive(c)}>{c.is_active ? 'Desativar' : 'Reativar'}</button>
           <button className="rounded px-3 py-1.5 text-left text-sm text-expense hover:bg-surface-2" onClick={() => { del.reset(); setDeleting(c); }}>Excluir</button>
         </div>
       </details>
@@ -69,19 +69,19 @@ export function CategoryManager() {
   return (
     <section className="card">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-semibold">Categorias</h2>
+        <h2 className="text-base font-semibold tracking-tight">Categorias</h2>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-xs text-muted">
             <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> Mostrar desativadas
           </label>
-          <button className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setEditing({ open: true })}>+ Categoria</button>
+          <button className="btn-secondary btn-sm" onClick={() => setEditing({ open: true })}>+ Categoria</button>
         </div>
       </div>
       <p className="mb-2 text-xs text-muted">
         Categorias em uso não podem ser excluídas — desative-as para preservar o histórico. “Essencial” ajudará a sugerir a
         ordem de pagamento (Fase 2).
       </p>
-      <ul className="divide-y divide-line/60">
+      <ul className="divide-y divide-fg/5">
         {roots.flatMap((r, i) => {
           const children = visible.filter((c) => c.parent_id === r.id);
           return [row(r, roots, i), ...children.map((c, j) => row(c, children, j, true))];

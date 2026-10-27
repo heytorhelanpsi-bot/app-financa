@@ -70,29 +70,29 @@ async function newTx(page, { type = 'Despesa', desc, amount, situation = 'Penden
 
   await page.goto(`${APP}/`);
   await page.getByText('Saldo bancário atual').waitFor();
-  assert((await text(page, 'section[aria-label="Saldos"] .text-3xl', 'R$ 4.000,00')).includes('R$ 4.000,00'), 'saldo inicial R$ 4.000 (VA fora do saldo livre)');
+  assert((await text(page, '[data-testid="saldo-bancario"]', 'R$ 4.000,00')).includes('R$ 4.000,00'), 'saldo inicial R$ 4.000 (VA fora do saldo livre)');
 
   // Teste A — despesa de 500 registrada e paga
   await newTx(page, { desc: 'Mercado', amount: '500' });
-  await page.locator('section[aria-label="Contas a pagar"]').getByRole('button', { name: 'Pagar' }).first().click();
+  await page.locator('section[aria-label^="A pagar"]').getByRole('button', { name: 'Pagar' }).first().click();
   await page.locator('dialog[open]').getByRole('button', { name: 'Confirmar' }).click();
   await page.getByText('Pagamento registrado.', { exact: true }).last().waitFor();
   await page.waitForTimeout(500);
-  assert((await text(page, 'section[aria-label="Saldos"] .text-3xl', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste A: saldo passa a R$ 3.500 após pagar R$ 500');
+  assert((await text(page, '[data-testid="saldo-bancario"]', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste A: saldo passa a R$ 3.500 após pagar R$ 500');
 
   // Teste B — despesa pendente de 800
   await newTx(page, { desc: 'Aluguel', amount: '800', due: future });
   await page.waitForTimeout(500);
-  assert((await text(page, 'section[aria-label="Saldos"] .text-3xl', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste B: saldo bancário não muda com despesa pendente');
+  assert((await text(page, '[data-testid="saldo-bancario"]', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste B: saldo bancário não muda com despesa pendente');
   const saldos = await text(page, 'section[aria-label="Saldos"]', 'R$ 2.700,00');
-  assert(saldos.includes('-R$ 800,00'), 'Teste B: R$ 800 aparece como comprometido');
+  assert(saldos.includes('R$ 800,00'), 'Teste B: R$ 800 aparece como comprometido');
   assert(saldos.includes('R$ 2.700,00'), 'Teste B: livre para gastar = R$ 2.700');
 
   // Teste C — receita prevista
   await newTx(page, { type: 'Receita', desc: 'Freela', amount: '1.500', situation: 'Prevista', due: future });
   await page.waitForTimeout(500);
-  assert((await text(page, 'section[aria-label="Saldos"] .text-3xl', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste C: receita prevista não altera saldo efetivo');
-  assert((await text(page, 'section[aria-label="Saldos"]', 'Depende de R$ 1.500,00')).includes('Depende de R$ 1.500,00'), 'Teste C: projeção sinaliza receita incerta');
+  assert((await text(page, '[data-testid="saldo-bancario"]', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste C: receita prevista não altera saldo efetivo');
+  assert((await text(page, 'section[aria-label="Saldos"]', 'depende de R$ 1.500,00')).includes('depende de R$ 1.500,00'), 'Teste C: projeção sinaliza receita incerta');
   await page.screenshot({ path: `${OUT}/03-inicio-celular.png`, fullPage: true });
 
   // Teste F — transferência
@@ -109,7 +109,7 @@ async function newTx(page, { type = 'Despesa', desc, amount, situation = 'Penden
   assert(contas.includes('R$ 3.300,00') && contas.includes('R$ 200,00'), 'Teste F: transferência move R$ 200 entre contas');
   await page.goto(`${APP}/`);
   await page.getByText('Saldo bancário atual').waitFor();
-  assert((await text(page, 'section[aria-label="Saldos"] .text-3xl', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste F: total bancário inalterado');
+  assert((await text(page, '[data-testid="saldo-bancario"]', 'R$ 3.500,00')).includes('R$ 3.500,00'), 'Teste F: total bancário inalterado');
   const despesas = await text(page, 'section[aria-label="Despesas do período"]');
   assert(despesas.includes('R$ 500,00'), 'Teste F: despesas pagas continuam R$ 500 (transferência não é despesa)');
 
@@ -122,7 +122,7 @@ async function newTx(page, { type = 'Despesa', desc, amount, situation = 'Penden
   await page.screenshot({ path: `${OUT}/04-movimentacoes.png`, fullPage: true });
   await page.goto(`${APP}/`);
   await page.getByText('Saldo bancário atual').waitFor();
-  assert((await text(page, 'section[aria-label="Saldos"] .text-3xl', 'R$ 4.000,00')).includes('R$ 4.000,00'), 'estorno devolve R$ 500 ao saldo e mantém histórico');
+  assert((await text(page, '[data-testid="saldo-bancario"]', 'R$ 4.000,00')).includes('R$ 4.000,00'), 'estorno devolve R$ 500 ao saldo e mantém histórico');
 
   // Teste G — outro dispositivo vê os mesmos dados, sem duplicação
   const desktop = await browser.newContext({ viewport: { width: 1366, height: 900 } });
@@ -133,7 +133,7 @@ async function newTx(page, { type = 'Despesa', desc, amount, situation = 'Penden
   await page2.getByRole('button', { name: 'Entrar' }).click();
   await page2.getByText('Saldo bancário atual').waitFor();
   await page2.waitForTimeout(800);
-  assert((await text(page2, 'section[aria-label="Saldos"] .text-3xl', 'R$ 4.000,00')).includes('R$ 4.000,00'), 'Teste G: computador vê o mesmo saldo');
+  assert((await text(page2, '[data-testid="saldo-bancario"]', 'R$ 4.000,00')).includes('R$ 4.000,00'), 'Teste G: computador vê o mesmo saldo');
   await page2.screenshot({ path: `${OUT}/05-inicio-desktop.png`, fullPage: true });
   await newTx(page, { desc: 'Farmácia', amount: '35,90' });
   await page2.goto(`${APP}/movimentacoes`);

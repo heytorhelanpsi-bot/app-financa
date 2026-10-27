@@ -23,6 +23,12 @@ export interface Profile {
   currency_code: string;
   timezone: string;
   theme: Theme;
+  occupation: string | null;
+  income_type: 'fixed' | 'variable' | 'mixed' | null;
+  monthly_income_cents: number | null;
+  paydays: number[];
+  financial_context: string | null;
+  ai_consent_at: string | null;
   version: number;
 }
 
@@ -106,6 +112,12 @@ export interface FinancialSummary {
   free_cents: number;
   projected_end_cents: number;
   projection_uncertain_income_cents: number;
+  debts: {
+    due_cents: number;
+    due_count: number;
+    overdue_cents: number;
+    overdue_count: number;
+  };
   expenses: {
     paid_cents: number;
     pending_cents: number;
@@ -129,4 +141,91 @@ export interface AuditLog {
   action: string;
   context: string | null;
   created_at: string;
+}
+
+// ---------------------------------------------------------------- Fase 2
+
+export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low';
+export type LateConsequence =
+  | 'service_cut'
+  | 'asset_loss'
+  | 'personal_trust'
+  | 'legal_action'
+  | 'credit_restriction'
+  | 'high_interest'
+  | 'other'
+  | 'none';
+export type DebtStatus = 'active' | 'paid_off' | 'archived';
+export type ChargeKind = 'interest' | 'fine' | 'fee' | 'discount';
+
+export interface Debt {
+  id: string;
+  user_id: string;
+  creditor_name: string;
+  description: string | null;
+  original_amount_cents: number;
+  contracted_amount_cents: number | null;
+  minimum_payment_cents: number | null;
+  installment_amount_cents: number | null;
+  installments_total: number | null;
+  next_due_date: string | null;
+  interest_rate_monthly: number | null;
+  late_fee_percent: number | null;
+  category_id: string | null;
+  account_id: string | null;
+  priority_level: PriorityLevel;
+  priority_rank: number;
+  is_essential: boolean;
+  late_consequence: LateConsequence;
+  consequence_notes: string | null;
+  debt_status: DebtStatus;
+  notes: string | null;
+  version: number;
+  created_at: string;
+}
+
+export interface DebtBalance {
+  debt_id: string;
+  original_amount_cents: number;
+  principal_paid_cents: number;
+  charges_paid_cents: number;
+  total_paid_cents: number;
+  charges_added_cents: number;
+  discounts_cents: number;
+  principal_outstanding_cents: number;
+  charges_outstanding_cents: number;
+  outstanding_cents: number;
+  last_payment_at: string | null;
+  payments_count: number;
+}
+
+export interface DebtPayment {
+  id: string;
+  debt_id: string;
+  transaction_id: string;
+  amount_cents: number;
+  principal_cents: number;
+  charges_cents: number;
+  payment_date: string;
+  notes: string | null;
+  reversed_at: string | null;
+  created_at: string;
+}
+
+export interface DebtCharge {
+  id: string;
+  debt_id: string;
+  charge_kind: ChargeKind;
+  amount_cents: number;
+  charge_date: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface ProjectionPoint {
+  day: string;
+  inflow_cents: number;
+  outflow_cents: number;
+  balance_cents: number;
+  uncertain_cents: number;
 }

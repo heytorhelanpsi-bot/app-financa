@@ -30,7 +30,7 @@ export function AccountForm({
     type: 'checking' as AccountType,
     opening: '',
     openingDate: today,
-    color: '#6ea8ff',
+    color: '#F88F22',
     active: true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,7 +46,7 @@ export function AccountForm({
       type: account?.account_type ?? 'checking',
       opening: account ? centsToInput(account.opening_balance_cents) : '',
       openingDate: account?.opening_date ?? today,
-      color: account?.color ?? '#6ea8ff',
+      color: account?.color ?? '#F88F22',
       active: account?.is_active ?? true,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

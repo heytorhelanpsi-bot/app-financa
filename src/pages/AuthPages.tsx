@@ -1,22 +1,26 @@
 import { useState, type ReactNode } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Field, FormError } from '@/components/ui';
+import { Logo } from '@/components/Logo';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 function AuthShell({ title, children, footer }: { title: string; children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <img src="/favicon.svg" alt="" className="h-9 w-9" />
-          <span className="text-lg font-bold tracking-tight">Financeiro Pessoal</span>
+    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
+      <div className="relative w-full max-w-sm">
+        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+          <Logo compact size={56} />
+          <div>
+            <p className="text-2xl font-bold tracking-tight">Financeiro <span className="text-sunset">Pessoal</span></p>
+            <p className="mt-1 text-sm text-muted">Saiba quanto você pode gastar, sem surpresas.</p>
+          </div>
         </div>
-        <div className="card p-6">
-          <h1 className="mb-4 text-lg font-semibold">{title}</h1>
+        <div className="glass rounded-[2rem] p-7 shadow-2xl">
+          <h1 className="mb-5 text-lg font-semibold tracking-tight">{title}</h1>
           {children}
         </div>
-        {footer && <div className="mt-4 text-center text-sm text-muted">{footer}</div>}
+        {footer && <div className="mt-6 text-center text-sm text-muted">{footer}</div>}
       </div>
     </div>
   );
@@ -62,8 +66,8 @@ export function LoginPage() {
   }
 
   return (
-    <AuthShell title="Entrar" footer={<>Não tem conta? <Link className="text-accent" to="/cadastro">Criar conta</Link></>}>
-      <form onSubmit={submit} className="grid gap-3">
+    <AuthShell title="Entrar" footer={<>Não tem conta? <Link className="font-semibold text-accent" to="/cadastro">Criar conta</Link></>}>
+      <form onSubmit={submit} className="grid gap-4">
         <FormError message={error} />
         <Field label="E-mail" htmlFor="li-email">
           <input id="li-email" type="email" autoComplete="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -71,7 +75,7 @@ export function LoginPage() {
         <Field label="Senha" htmlFor="li-pw">
           <input id="li-pw" type="password" autoComplete="current-password" required className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
-        <button className="btn-primary mt-1" disabled={pending}>{pending ? 'Entrando…' : 'Entrar'}</button>
+        <button className="btn-primary mt-2 h-11" disabled={pending}>{pending ? 'Entrando…' : 'Entrar'}</button>
         <Link to="/recuperar-senha" className="text-center text-sm text-accent">Esqueci minha senha</Link>
       </form>
     </AuthShell>
@@ -105,7 +109,7 @@ export function SignUpPage() {
 
   if (done) {
     return (
-      <AuthShell title="Verifique seu e-mail" footer={<Link className="text-accent" to="/entrar">Voltar para o login</Link>}>
+      <AuthShell title="Verifique seu e-mail" footer={<Link className="font-semibold text-accent" to="/entrar">Voltar para o login</Link>}>
         <p className="text-sm text-muted">
           Se o cadastro for aceito, você receberá um link de confirmação em <strong className="text-fg">{email}</strong>. Depois
           de confirmar, entre com sua senha.
@@ -115,8 +119,8 @@ export function SignUpPage() {
   }
 
   return (
-    <AuthShell title="Criar conta" footer={<>Já tem conta? <Link className="text-accent" to="/entrar">Entrar</Link></>}>
-      <form onSubmit={submit} className="grid gap-3">
+    <AuthShell title="Criar conta" footer={<>Já tem conta? <Link className="font-semibold text-accent" to="/entrar">Entrar</Link></>}>
+      <form onSubmit={submit} className="grid gap-4">
         <FormError message={error} />
         <Field label="Nome (opcional)" htmlFor="su-name">
           <input id="su-name" className="input" maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -127,7 +131,7 @@ export function SignUpPage() {
         <Field label="Senha" htmlFor="su-pw" hint="Mínimo de 8 caracteres.">
           <input id="su-pw" type="password" autoComplete="new-password" required minLength={8} className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
-        <button className="btn-primary mt-1" disabled={pending}>{pending ? 'Criando…' : 'Criar conta'}</button>
+        <button className="btn-primary mt-2 h-11" disabled={pending}>{pending ? 'Criando…' : 'Criar conta'}</button>
       </form>
     </AuthShell>
   );
@@ -152,11 +156,11 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell title="Recuperar senha" footer={<Link className="text-accent" to="/entrar">Voltar para o login</Link>}>
+    <AuthShell title="Recuperar senha" footer={<Link className="font-semibold text-accent" to="/entrar">Voltar para o login</Link>}>
       {sent ? (
         <p className="text-sm text-muted">Se houver uma conta com este e-mail, enviaremos um link para redefinir a senha.</p>
       ) : (
-        <form onSubmit={submit} className="grid gap-3">
+        <form onSubmit={submit} className="grid gap-4">
           <FormError message={error} />
           <Field label="E-mail" htmlFor="fp-email">
             <input id="fp-email" type="email" autoComplete="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -178,7 +182,7 @@ export function ResetPasswordPage() {
   if (loading) return null;
   if (!session) {
     return (
-      <AuthShell title="Link inválido ou expirado" footer={<Link className="text-accent" to="/recuperar-senha">Solicitar novo link</Link>}>
+      <AuthShell title="Link inválido ou expirado" footer={<Link className="font-semibold text-accent" to="/recuperar-senha">Solicitar novo link</Link>}>
         <p className="text-sm text-muted">Abra o link mais recente enviado para o seu e-mail.</p>
       </AuthShell>
     );
@@ -196,7 +200,7 @@ export function ResetPasswordPage() {
 
   return (
     <AuthShell title="Definir nova senha">
-      <form onSubmit={submit} className="grid gap-3">
+      <form onSubmit={submit} className="grid gap-4">
         <FormError message={error} />
         <Field label="Nova senha" htmlFor="rp-pw" hint="Mínimo de 8 caracteres.">
           <input id="rp-pw" type="password" autoComplete="new-password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} />

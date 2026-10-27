@@ -194,7 +194,7 @@ export function TransactionForm({
         </>
       }
     >
-      <form id="tx-form" onSubmit={submit} noValidate className="grid grid-cols-2 gap-3">
+      <form id="tx-form" onSubmit={submit} noValidate className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <FormError message={save.error ? friendlyError(save.error) : null} />
           {lockedFinancials && (
@@ -285,8 +285,8 @@ export function TransactionForm({
                     role="radio"
                     aria-checked={form.situation === s}
                     onClick={() => set('situation', s)}
-                    className={`rounded-lg border px-2 py-2 text-left text-xs ${
-                      form.situation === s ? 'border-accent bg-accent/10' : 'border-line'
+                    className={`rounded-xl border px-3 py-2.5 text-left text-xs transition ${
+                      form.situation === s ? 'border-accent bg-accent/10 ring-4 ring-accent/10' : 'border-line hover:border-muted/40'
                     }`}
                   >
                     <span className="block text-sm font-semibold">{label}</span>

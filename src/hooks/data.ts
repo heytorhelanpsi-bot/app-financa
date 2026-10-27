@@ -2,6 +2,11 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import { supabase } from '@/lib/supabase';
 import { ConflictError } from '@/lib/errors';
 import type {
+  Debt,
+  DebtBalance,
+  DebtCharge,
+  DebtPayment,
+  ProjectionPoint,
   Account,
   AccountBalance,
   AuditLog,
@@ -24,6 +29,8 @@ export const keys = {
   transactions: ['transactions'] as const,
   summary: ['summary'] as const,
   audit: ['audit'] as const,
+  debts: ['debts'] as const,
+  projection: ['projection'] as const,
 };
 
 /** Após qualquer alteração financeira confirmada, saldos e relatórios são recarregados. */
@@ -34,6 +41,8 @@ export function invalidateFinancial(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: keys.summary }),
     qc.invalidateQueries({ queryKey: keys.accounts }),
     qc.invalidateQueries({ queryKey: keys.audit }),
+    qc.invalidateQueries({ queryKey: keys.debts }),
+    qc.invalidateQueries({ queryKey: keys.projection }),
   ]);
 }
 
@@ -64,7 +73,23 @@ export function useProfile() {
 export function useUpdateProfile() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (p: { profile: Profile; patch: Partial<Pick<Profile, 'display_name' | 'theme' | 'timezone'>> }) =>
+    mutationFn: (p: {
+      profile: Profile;
+      patch: Partial<
+        Pick<
+          Profile,
+          | 'display_name'
+          | 'theme'
+          | 'timezone'
+          | 'occupation'
+          | 'income_type'
+          | 'monthly_income_cents'
+          | 'paydays'
+          | 'financial_context'
+          | 'ai_consent_at'
+        >
+      >;
+    }) =>
       updateVersioned<Profile>('profiles', p.profile.id, p.profile.version, p.patch),
     onSettled: () => qc.invalidateQueries({ queryKey: keys.profile }),
   });
@@ -428,7 +453,163 @@ export function useSummary(p: SummaryParams) {
           p_include_forecast_expenses: p.includeForecastExpenses,
           p_include_pending_income: p.includePendingIncome,
           p_include_forecast_income: p.includeForecastIncome,
+          p_include_debts: true,
         }),
       ),
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Projeção diária
+// -----------------------------------------------------------------------------
+
+export function useProjection(p: {
+  end: string;
+  includeForecastExpenses: boolean;
+  includePendingIncome: boolean;
+  includeForecastIncome: boolean;
+}) {
+  return useQuery({
+    queryKey: [...keys.projection, p],
+    queryFn: async () =>
+      unwrap<ProjectionPoint[]>(
+        await supabase.rpc('balance_projection', {
+          p_end: p.end,
+          p_include_forecast_expenses: p.includeForecastExpenses,
+          p_include_pending_income: p.includePendingIncome,
+          p_include_forecast_income: p.includeForecastIncome,
+          p_include_debts: true,
+        }),
+      ),
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Dívidas
+// -----------------------------------------------------------------------------
+
+export function useDebts() {
+  return useQuery({
+    queryKey: keys.debts,
+    queryFn: async () => {
+      const [debts, balances] = await Promise.all([
+        supabase.from('debts').select('*').order('priority_rank').order('created_at'),
+        supabase.from('debt_balances').select('*'),
+      ]);
+      return { debts: unwrap<Debt[]>(debts), balances: unwrap<DebtBalance[]>(balances) };
+    },
+  });
+}
+
+export function useDebtHistory(debtId: string | null) {
+  return useQuery({
+    queryKey: [...keys.debts, 'history', debtId],
+    enabled: !!debtId,
+    queryFn: async () => {
+      const [payments, charges] = await Promise.all([
+        supabase.from('debt_payments').select('*').eq('debt_id', debtId!).order('payment_date', { ascending: false }),
+        supabase.from('debt_charges').select('*').eq('debt_id', debtId!).order('charge_date', { ascending: false }),
+      ]);
+      return { payments: unwrap<DebtPayment[]>(payments), charges: unwrap<DebtCharge[]>(charges) };
+    },
+  });
+}
+
+export interface DebtInput {
+  creditor_name: string;
+  description: string | null;
+  original_amount_cents: number;
+  contracted_amount_cents: number | null;
+  minimum_payment_cents: number | null;
+  installment_amount_cents: number | null;
+  installments_total: number | null;
+  next_due_date: string | null;
+  interest_rate_monthly: number | null;
+  late_fee_percent: number | null;
+  category_id: string | null;
+  account_id: string | null;
+  priority_level: Debt['priority_level'];
+  is_essential: boolean;
+  late_consequence: Debt['late_consequence'];
+  consequence_notes: string | null;
+  notes: string | null;
+}
+
+export function useSaveDebt() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: { id: string; existing?: Debt; input: Partial<DebtInput> & { debt_status?: Debt['debt_status'] } }) => {
+      if (p.existing) {
+        const patch: Record<string, unknown> = { ...p.input };
+        if (patch.original_amount_cents === p.existing.original_amount_cents) delete patch.original_amount_cents;
+        return updateVersioned<Debt>('debts', p.id, p.existing.version, patch);
+      }
+      const { error } = await supabase.from('debts').upsert({ id: p.id, ...p.input }, { onConflict: 'id', ignoreDuplicates: true });
+      if (error) throw error;
+    },
+    onSettled: () => invalidateFinancial(qc),
+  });
+}
+
+export function useDeleteDebt() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => unwrap(await supabase.from('debts').delete().eq('id', id)),
+    onSettled: () => invalidateFinancial(qc),
+  });
+}
+
+export function usePayDebt() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: {
+      debt_id: string;
+      account_id: string;
+      date: string;
+      principal_cents: number;
+      charges_cents: number;
+      advance_due: boolean;
+      notes: string;
+      key: string;
+    }) =>
+      unwrap<{ payment_id: string; transaction_id: string; outstanding_cents: number; paid_off: boolean }>(
+        await supabase.rpc('pay_debt', {
+          p_debt_id: p.debt_id,
+          p_account_id: p.account_id,
+          p_payment_date: p.date,
+          p_principal_cents: p.principal_cents,
+          p_charges_cents: p.charges_cents,
+          p_advance_due: p.advance_due,
+          p_notes: p.notes,
+          p_idempotency_key: p.key,
+        }),
+      ),
+    onSettled: () => invalidateFinancial(qc),
+  });
+}
+
+export function useAddDebtCharge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: { debt_id: string; kind: DebtCharge['charge_kind']; amount_cents: number; date: string; description: string; key: string }) =>
+      unwrap<string>(
+        await supabase.rpc('add_debt_charge', {
+          p_debt_id: p.debt_id,
+          p_kind: p.kind,
+          p_amount_cents: p.amount_cents,
+          p_charge_date: p.date,
+          p_description: p.description,
+          p_idempotency_key: p.key,
+        }),
+      ),
+    onSettled: () => invalidateFinancial(qc),
+  });
+}
+
+export function useReorderDebts() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => unwrap(await supabase.rpc('reorder_debts', { p_debt_ids: ids })),
+    onSettled: () => qc.invalidateQueries({ queryKey: keys.debts }),
   });
 }

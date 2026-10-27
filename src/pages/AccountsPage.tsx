@@ -36,38 +36,47 @@ export function AccountsPage() {
   const card = (a: Account) => {
     const b = balanceMap.get(a.id);
     const bal = Number(b?.balance_cents ?? 0);
+    const color = a.color ?? 'rgb(var(--accent))';
     return (
-      <li key={a.id} className="card flex flex-col gap-3">
+      <li key={a.id} className="card flex flex-col gap-5 transition hover:border-line">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <span className="mt-1 h-3 w-3 shrink-0 rounded-full" style={{ background: a.color ?? 'rgb(var(--line))' }} aria-hidden />
+          <div className="flex min-w-0 items-center gap-3">
+            <span
+              className="icon-bubble font-bold"
+              style={{ color, background: `color-mix(in srgb, ${color} 15%, transparent)` }}
+              aria-hidden
+            >
+              {a.name.trim().charAt(0).toUpperCase()}
+            </span>
             <div className="min-w-0">
               <p className="truncate font-semibold">{a.name}</p>
-              <p className="text-xs text-muted">
+              <p className="truncate text-xs text-muted">
                 {[a.institution_name, ACCOUNT_TYPE_LABEL[a.account_type]].filter(Boolean).join(' · ')}
               </p>
             </div>
           </div>
-          <Money cents={bal} className={`text-lg font-bold ${bal < 0 ? 'text-expense' : ''}`} />
-        </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-          <span>Cadastro manual · sem conexão bancária</span>
-          <span>Último movimento: {formatDate(b?.last_movement_at)}</span>
-          <span>
-            Saldo inicial <Money cents={a.opening_balance_cents} /> em {formatDate(a.opening_date)}
+          <span className="shrink-0 rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
+            Manual
           </span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/movimentacoes?conta=${a.id}`}>Histórico</Link>
+        <div>
+          <Money cents={bal} className={`block text-2xl font-semibold tracking-tight ${bal < 0 ? 'text-expense' : ''}`} />
+          <p className="mt-1 text-xs text-muted">
+            Último movimento {formatDate(b?.last_movement_at)} · inicial <Money cents={a.opening_balance_cents} /> em{' '}
+            {formatDate(a.opening_date)}
+          </p>
+        </div>
+        <div className="-mx-1 flex flex-wrap gap-1 border-t border-fg/10 pt-3">
+          <Link className="btn-ghost btn-sm" to={`/movimentacoes?conta=${a.id}`}>Histórico</Link>
           {a.is_active && (
             <>
-              <button className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setTransferFrom(a.id)}>Transferir</button>
-              <button className="btn-secondary px-3 py-1.5 text-xs" onClick={() => b && setAdjusting(b)}>Ajustar saldo</button>
+              <button className="btn-ghost btn-sm" onClick={() => setTransferFrom(a.id)}>Transferir</button>
+              <button className="btn-ghost btn-sm" onClick={() => b && setAdjusting(b)}>Ajustar saldo</button>
             </>
           )}
-          <button className="btn-secondary px-3 py-1.5 text-xs" onClick={() => setEditing({ open: true, account: a })}>Editar</button>
+          <button className="btn-ghost btn-sm" onClick={() => setEditing({ open: true, account: a })}>Editar</button>
           {!b?.last_movement_at && (
-            <button className="btn-ghost px-3 py-1.5 text-xs text-expense" onClick={() => { del.reset(); setDeleting(a); }}>Excluir</button>
+            <button className="btn-ghost btn-sm text-expense" onClick={() => { del.reset(); setDeleting(a); }}>Excluir</button>
           )}
         </div>
       </li>
@@ -89,15 +98,18 @@ export function AccountsPage() {
         }
       />
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2">
-        <div className="card">
-          <p className="text-xs uppercase tracking-wide text-muted">Dinheiro em contas</p>
-          <Money cents={sum(cash)} className="text-2xl font-bold" />
+      <div className="mb-8 grid gap-4 sm:grid-cols-2">
+        <div className="hero p-6">
+          <div className="hero-sun" aria-hidden />
+          <div className="hero-sheen" aria-hidden />
+          <p className="eyebrow">Dinheiro em contas</p>
+          <Money cents={sum(cash)} className="mt-2 block text-4xl font-semibold tracking-tight" />
+          <p className="mt-2 text-xs text-muted">{cash.length} conta(s) ativa(s)</p>
         </div>
-        <div className="card">
-          <p className="text-xs uppercase tracking-wide text-muted">Benefícios (uso restrito)</p>
-          <Money cents={sum(benefits)} className="text-2xl font-bold text-muted" />
-          <p className="text-xs text-muted">Não somado ao saldo livre.</p>
+        <div className="hero-soft">
+          <p className="eyebrow">Benefícios · uso restrito</p>
+          <Money cents={sum(benefits)} className="mt-2 block text-4xl font-semibold tracking-tight" />
+          <p className="mt-2 text-xs text-muted">Controlados à parte, fora do saldo livre</p>
         </div>
       </div>
 
@@ -107,31 +119,39 @@ export function AccountsPage() {
         </EmptyState>
       ) : (
         <>
-          {cash.length > 0 && <ul className="grid gap-3 lg:grid-cols-2">{cash.map(card)}</ul>}
+          {cash.length > 0 && (
+            <>
+              <h2 className="eyebrow mb-3">Contas</h2>
+              <ul className="grid gap-4 lg:grid-cols-2">{cash.map(card)}</ul>
+            </>
+          )}
           {benefits.length > 0 && (
             <>
-              <h2 className="mb-2 mt-6 text-sm font-semibold text-muted">Benefícios</h2>
-              <ul className="grid gap-3 lg:grid-cols-2">{benefits.map(card)}</ul>
+              <h2 className="eyebrow mb-3 mt-8">Benefícios</h2>
+              <ul className="grid gap-4 lg:grid-cols-2">{benefits.map(card)}</ul>
             </>
           )}
           {inactive.length > 0 && (
-            <div className="mt-6">
-              <button className="text-sm font-medium text-accent" onClick={() => setShowInactive((v) => !v)} aria-expanded={showInactive}>
+            <div className="mt-8">
+              <button className="link text-sm" onClick={() => setShowInactive((v) => !v)} aria-expanded={showInactive}>
                 {showInactive ? 'Ocultar' : 'Mostrar'} contas desativadas ({inactive.length})
               </button>
-              {showInactive && <ul className="mt-3 grid gap-3 opacity-80 lg:grid-cols-2">{inactive.map(card)}</ul>}
+              {showInactive && <ul className="mt-4 grid gap-4 opacity-70 lg:grid-cols-2">{inactive.map(card)}</ul>}
             </div>
           )}
         </>
       )}
 
-      <div className="card mt-6 text-sm">
+      <div className="mt-10 flex gap-3 rounded-2xl border border-dashed border-line p-5 text-sm">
+        <span className="dot mt-1.5 bg-warn" aria-hidden />
+        <div>
         <p className="font-semibold">Conexão bancária (Open Finance)</p>
         <p className="mt-1 text-muted">
           Ainda não disponível. Nesta versão os saldos são mantidos manualmente, sem acesso às suas contas e sem senhas
           bancárias. A integração via provedor autorizado do Open Finance Brasil está prevista para a Fase 4 e dependerá de
           contratação do provedor.
         </p>
+        </div>
       </div>
 
       <AccountForm
