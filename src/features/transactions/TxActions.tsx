@@ -365,11 +365,11 @@ function DetailsDialog({ tx, onClose, api }: { tx: Transaction | null; onClose: 
   return (
     <Modal open onClose={onClose} title={tx.description} wide>
       <FormError message={update.error ? friendlyError(update.error) : null} />
-      <p className={`mb-4 text-2xl font-bold ${amountColor(tx)}`}>
+      <p className={`mb-5 text-4xl font-semibold tracking-tight ${amountColor(tx)}`}>
         <Money cents={tx.direction === 'out' ? -(tx.settled_amount_cents ?? tx.amount_cents) : tx.settled_amount_cents ?? tx.amount_cents} signed />
       </p>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-6 flex flex-wrap gap-2">
         {open && userType && (
           <button className="btn-primary" onClick={go(api.openSettle)}>
             {tx.direction === 'out' ? 'Pagar' : 'Receber'}
@@ -411,16 +411,16 @@ function DetailsDialog({ tx, onClose, api }: { tx: Transaction | null; onClose: 
         )}
       </div>
 
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-1 rounded-2xl border border-line/70 px-4 py-2 text-sm sm:grid-cols-2">
         {rows.map(([k, v]) => (
-          <div key={k} className="flex justify-between gap-3 border-b border-line/60 py-1">
+          <div key={k} className="flex justify-between gap-3 py-2">
             <dt className="text-muted">{k}</dt>
             <dd className="text-right">{v}</dd>
           </div>
         ))}
       </dl>
 
-      <h3 className="mb-2 mt-5 text-sm font-semibold">Histórico</h3>
+      <h3 className="eyebrow mb-2 mt-6">Histórico</h3>
       {audit.isLoading ? (
         <p className="text-xs text-muted">Carregando…</p>
       ) : (

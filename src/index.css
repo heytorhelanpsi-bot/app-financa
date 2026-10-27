@@ -2,35 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Sistema visual: minimalismo + neon.
+ * Superfícies grafite discretas, linhas finas e cor apenas onde há significado:
+ *   vermelho neon = saída efetiva · laranja suave = saída prevista
+ *   verde neon    = entrada efetiva · verde suave  = entrada prevista
+ *   ciano neon    = ação / destaque
+ */
 :root {
-  --bg: 244 245 247;
+  --bg: 246 247 249;
   --surface: 255 255 255;
-  --surface-2: 236 238 241;
-  --line: 218 221 226;
-  --fg: 24 27 32;
-  --muted: 100 106 115;
-  --expense: 220 20 60;
-  --expense-forecast: 214 120 40;
-  --income: 0 160 80;
-  --income-forecast: 70 150 100;
-  --accent: 40 110 220;
-  --warn: 200 130 0;
+  --surface-2: 241 243 246;
+  --line: 226 229 235;
+  --fg: 15 17 22;
+  --muted: 105 112 126;
+  --expense: 226 29 86;
+  --expense-forecast: 212 118 36;
+  --income: 0 158 98;
+  --income-forecast: 64 150 108;
+  --accent: 0 136 204;
+  --accent-fg: 255 255 255;
+  --warn: 186 128 0;
+  --glow: 0;
   color-scheme: light;
 }
 
 .dark {
-  --bg: 18 20 23;
-  --surface: 28 31 36;
-  --surface-2: 38 42 48;
-  --line: 52 57 64;
-  --fg: 235 237 240;
-  --muted: 150 156 166;
-  --expense: 255 59 92;
-  --expense-forecast: 245 166 100;
-  --income: 57 255 136;
-  --income-forecast: 140 214 168;
-  --accent: 110 168 255;
-  --warn: 255 196 0;
+  --bg: 10 11 14;
+  --surface: 18 20 25;
+  --surface-2: 26 29 35;
+  --line: 38 42 50;
+  --fg: 238 241 246;
+  --muted: 134 141 156;
+  --expense: 255 61 113;
+  --expense-forecast: 255 172 104;
+  --income: 0 255 163;
+  --income-forecast: 128 222 172;
+  --accent: 0 229 255;
+  --accent-fg: 6 16 20;
+  --warn: 255 210 64;
+  --glow: 1;
   color-scheme: dark;
 }
 
@@ -42,47 +53,148 @@ body,
 
 body {
   @apply bg-bg text-fg antialiased;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Luz ambiente sutil no topo (apenas tema escuro). */
+.dark body {
+  background-image:
+    radial-gradient(60rem 28rem at 15% -10%, rgb(0 229 255 / 0.07), transparent 60%),
+    radial-gradient(50rem 24rem at 95% -5%, rgb(0 255 163 / 0.05), transparent 60%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.25);
+}
+
 @layer components {
+  /* ---------------------------------------------------------- superfícies */
   .card {
-    @apply rounded-xl border border-line bg-surface p-4;
+    @apply rounded-2xl border border-line/70 bg-surface p-5;
   }
+  .card-flat {
+    @apply rounded-2xl border border-line/70 bg-surface;
+  }
+  .hero {
+    @apply relative overflow-hidden rounded-3xl border border-line/70 bg-surface p-6 md:p-8;
+  }
+  .dark .hero {
+    background:
+      radial-gradient(40rem 16rem at 0% 0%, rgb(0 229 255 / 0.08), transparent 70%),
+      radial-gradient(30rem 14rem at 100% 100%, rgb(0 255 163 / 0.06), transparent 70%),
+      rgb(var(--surface));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 30px 60px -40px rgb(0 229 255 / 0.25);
+  }
+
+  /* ---------------------------------------------------------- tipografia */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum', 'cv11';
+  }
+
+  /* ---------------------------------------------------------- formulários */
   .input {
-    @apply w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-fg placeholder:text-muted
-      focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60;
+    @apply h-11 w-full rounded-xl border border-line bg-surface-2/60 px-3.5 text-sm text-fg transition
+      placeholder:text-muted/70 focus:border-accent/70 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-accent/15
+      disabled:opacity-60;
+  }
+  textarea.input {
+    @apply h-auto py-2.5;
   }
   .label {
-    @apply mb-1 block text-xs font-medium text-muted;
+    @apply mb-1.5 block text-xs font-medium text-muted;
   }
+
+  /* ---------------------------------------------------------- botões */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-semibold transition
+      focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 active:scale-[0.98]
+      disabled:pointer-events-none disabled:opacity-45;
   }
   .btn-primary {
-    @apply btn bg-accent text-white hover:bg-accent/90 dark:text-bg;
+    @apply btn bg-accent text-[rgb(var(--accent-fg))] hover:brightness-110;
+  }
+  .dark .btn-primary {
+    box-shadow: 0 0 0 1px rgb(0 229 255 / 0.5), 0 8px 28px -10px rgb(0 229 255 / 0.7);
   }
   .btn-secondary {
-    @apply btn border border-line bg-surface-2 text-fg hover:bg-line/60;
+    @apply btn border border-line bg-surface text-fg hover:border-muted/40 hover:bg-surface-2;
   }
   .btn-danger {
-    @apply btn bg-expense text-white hover:bg-expense/90;
+    @apply btn border border-expense/40 bg-expense/10 text-expense hover:bg-expense/20;
   }
   .btn-ghost {
     @apply btn text-muted hover:bg-surface-2 hover:text-fg;
   }
+  .btn-sm {
+    @apply h-8 rounded-lg px-3 text-xs;
+  }
+  .pill-action {
+    @apply inline-flex h-7 items-center rounded-full border border-accent/40 px-3 text-xs font-semibold text-accent transition
+      hover:bg-accent/10 active:scale-95;
+  }
+
+  /* ---------------------------------------------------------- seletores */
+  .segmented {
+    @apply inline-flex flex-wrap gap-1 rounded-xl border border-line/70 bg-surface-2/60 p-1;
+  }
   .chip {
-    @apply inline-flex items-center rounded-full border border-line px-3 py-1 text-xs font-medium text-muted transition hover:text-fg;
+    @apply inline-flex h-8 items-center rounded-lg px-3 text-xs font-semibold text-muted transition hover:text-fg;
   }
   .chip-active {
-    @apply border-accent bg-accent/15 text-fg;
+    @apply bg-surface text-fg shadow-sm ring-1 ring-line;
   }
-  .tabular {
-    font-variant-numeric: tabular-nums;
+  .dark .chip-active {
+    box-shadow: 0 0 0 1px rgb(0 229 255 / 0.35), 0 0 18px -6px rgb(0 229 255 / 0.6);
+  }
+
+  /* ---------------------------------------------------------- detalhes */
+  .dot {
+    @apply inline-block h-2 w-2 shrink-0 rounded-full;
+  }
+  .link {
+    @apply text-xs font-semibold text-accent hover:underline;
+  }
+}
+
+@layer utilities {
+  /* Brilho neon nos números-chave (somente no tema escuro). */
+  .dark .glow-income {
+    text-shadow: 0 0 28px rgb(0 255 163 / 0.35);
+  }
+  .dark .glow-expense {
+    text-shadow: 0 0 28px rgb(255 61 113 / 0.35);
+  }
+  .dark .glow-accent {
+    text-shadow: 0 0 28px rgb(0 229 255 / 0.35);
+  }
+  .dark .glow-dot-income {
+    box-shadow: 0 0 10px rgb(0 255 163 / 0.8);
+  }
+  .dark .glow-dot-expense {
+    box-shadow: 0 0 10px rgb(255 61 113 / 0.8);
+  }
+  .dark .glow-dot-accent {
+    box-shadow: 0 0 10px rgb(0 229 255 / 0.8);
   }
 }
 
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+dialog::backdrop {
+  backdrop-filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

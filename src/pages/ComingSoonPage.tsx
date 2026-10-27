@@ -39,10 +39,18 @@ export function ComingSoonPage({ area }: { area: keyof typeof CONTENT }) {
   return (
     <div>
       <PageHeader title={c.title} subtitle={`Prevista para a Fase ${c.phase}. Ainda não disponível nesta versão.`} />
-      <div className="card text-sm">
-        <p className="mb-2 font-semibold">O que esta área terá:</p>
-        <ul className="list-disc space-y-1 pl-5 text-muted">
-          {c.items.map((i) => <li key={i}>{i}</li>)}
+      <div className="card max-w-2xl text-sm">
+        <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+          <span className="dot h-1.5 w-1.5 bg-accent glow-dot-accent" /> Fase {c.phase} · em breve
+        </span>
+        <p className="mb-3 font-semibold">O que esta área terá</p>
+        <ul className="space-y-2.5 text-muted">
+          {c.items.map((i) => (
+            <li key={i} className="flex gap-3">
+              <span className="dot mt-1.5 h-1.5 w-1.5 bg-line" aria-hidden />
+              {i}
+            </li>
+          ))}
         </ul>
         {area === 'ordem' && (
           <p className="mt-4 text-muted">

@@ -74,11 +74,11 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <PageHeader title="Configurações" />
+    <div className="space-y-6">
+      <PageHeader title="Configurações" subtitle="Perfil, categorias, dados e segurança." />
 
-      <section className="card grid gap-4 sm:grid-cols-2">
-        <h2 className="font-semibold sm:col-span-2">Perfil e aparência</h2>
+      <section className="card grid gap-5 sm:grid-cols-2">
+        <h2 className="text-base font-semibold tracking-tight sm:col-span-2">Perfil e aparência</h2>
         <Field label="Nome de exibição" htmlFor="pf-name">
           <div className="flex gap-2">
             <input id="pf-name" className="input" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
@@ -94,7 +94,7 @@ export function SettingsPage() {
         </Field>
         <div className="sm:col-span-2">
           <span className="label">Tema</span>
-          <div className="flex gap-2" role="radiogroup" aria-label="Tema">
+          <div className="segmented" role="radiogroup" aria-label="Tema">
             {([['dark', 'Escuro'], ['light', 'Claro'], ['system', 'Do sistema']] as const).map(([t, l]) => (
               <button key={t} role="radio" aria-checked={p.theme === t} className={`chip ${p.theme === t ? 'chip-active' : ''}`} onClick={() => setTheme(t)}>
                 {l}
@@ -107,8 +107,8 @@ export function SettingsPage() {
 
       <CategoryManager />
 
-      <section className="card space-y-3">
-        <h2 className="font-semibold">Seus dados</h2>
+      <section className="card space-y-4">
+        <h2 className="text-base font-semibold tracking-tight">Seus dados</h2>
         <p className="text-sm text-muted">
           Os dados ficam no banco de dados em nuvem, isolados por usuário, e sincronizam entre seus dispositivos. Você pode
           baixar uma cópia completa a qualquer momento.
@@ -123,8 +123,8 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <section className="card space-y-3">
-        <h2 className="font-semibold">Segurança</h2>
+      <section className="card space-y-4">
+        <h2 className="text-base font-semibold tracking-tight">Segurança</h2>
         <form onSubmit={changePassword} className="flex flex-wrap items-end gap-2" noValidate>
           <Field label="Nova senha" htmlFor="pf-pw" className="min-w-[220px] flex-1">
             <input id="pf-pw" type="password" autoComplete="new-password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} />

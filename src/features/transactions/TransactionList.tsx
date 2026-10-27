@@ -38,29 +38,38 @@ export function TransactionRow({
   const signed = tx.direction === 'out' ? -(tx.settled_amount_cents ?? tx.amount_cents) : tx.settled_amount_cents ?? tx.amount_cents;
   const canSettle = isOpen(tx) && (tx.transaction_type === 'income' || tx.transaction_type === 'expense');
 
+  const muted = !!tx.reversed_at || tx.status === 'canceled';
+  const isSystem = tx.transaction_type !== 'income' && tx.transaction_type !== 'expense';
+  const tint = category?.color ?? (isSystem ? 'rgb(var(--muted))' : tx.direction === 'out' ? 'rgb(var(--expense))' : 'rgb(var(--income))');
+  const glyph = tx.transaction_type === 'transfer' ? '⇄' : tx.transaction_type === 'reversal' ? '↺' : tx.transaction_type === 'adjustment' ? '±' : tx.direction === 'out' ? '↑' : '↓';
+
   return (
-    <li className="flex items-center gap-3 px-3 py-2.5 hover:bg-surface-2/60">
+    <li className="group flex items-center gap-3.5 px-4 py-3 transition hover:bg-surface-2/50">
       <span
-        className="h-8 w-1 shrink-0 rounded-full"
-        style={{ background: category?.color ?? 'rgb(var(--line))' }}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+        style={{ color: tint, background: `color-mix(in srgb, ${tint} 14%, transparent)` }}
         aria-hidden
-      />
+      >
+        {glyph}
+      </span>
       <button className="min-w-0 flex-1 text-left" onClick={() => openDetails(tx)}>
-        <span className={`block truncate text-sm font-medium ${tx.reversed_at || tx.status === 'canceled' ? 'text-muted line-through' : ''}`}>
-          {tx.description}
-        </span>
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
+        <span className={`block truncate text-sm font-medium ${muted ? 'text-muted line-through' : ''}`}>{tx.description}</span>
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
           {showDate && <span>{formatDayHeader(tx.ref_date, today)}</span>}
+          {showDate && (category || account) && <span aria-hidden>·</span>}
           {category && <span>{category.name}</span>}
-          {account && <span>· {account.name}</span>}
-          {tx.transaction_type === 'reversal' ? <Badge>Estorno</Badge> : <StatusBadge status={status} reversed={!!tx.reversed_at} />}
+          {category && account && <span aria-hidden>·</span>}
+          {account && <span>{account.name}</span>}
+          <span className="ml-0.5">
+            {tx.transaction_type === 'reversal' ? <Badge>Estorno</Badge> : <StatusBadge status={status} reversed={!!tx.reversed_at} />}
+          </span>
           {tx.archived_at && <Badge>Arquivado</Badge>}
         </span>
       </button>
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <Money cents={signed} signed className={`text-sm font-semibold ${amountColor(tx)}`} />
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <Money cents={signed} signed className={`text-sm font-semibold ${tx.reversed_at ? 'text-muted line-through' : amountColor(tx)}`} />
         {canSettle && (
-          <button className="text-xs font-semibold text-accent" onClick={() => openSettle(tx)}>
+          <button className="pill-action" onClick={() => openSettle(tx)}>
             {tx.direction === 'out' ? 'Pagar' : 'Receber'}
           </button>
         )}
@@ -93,13 +102,11 @@ export function GroupedTransactionList({
   }, [transactions]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       {groups.map(([date, items]) => (
-        <section key={date} className="overflow-hidden rounded-xl border border-line bg-surface">
-          <h3 className="border-b border-line bg-surface-2/50 px-3 py-1.5 text-xs font-semibold text-muted">
-            {formatDayHeader(date, today)}
-          </h3>
-          <ul className="divide-y divide-line/60">
+        <section key={date}>
+          <h3 className="eyebrow mb-2 px-1">{formatDayHeader(date, today)}</h3>
+          <ul className="card-flat divide-y divide-line/60 overflow-hidden">
             {items.map((t) => (
               <TransactionRow
                 key={t.id}
