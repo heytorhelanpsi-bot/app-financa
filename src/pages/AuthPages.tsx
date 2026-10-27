@@ -22,14 +22,26 @@ function AuthShell({ title, children, footer }: { title: string; children: React
   );
 }
 
-/** Mensagens do Auth sem revelar se um e-mail existe ou detalhes internos. */
+/**
+ * Mensagens do Auth sem revelar se um e-mail existe. Para erros não previstos,
+ * o texto técnico do serviço de autenticação é anexado para facilitar o diagnóstico
+ * (ele não contém dados de outros usuários).
+ */
 function authMessage(message: string): string {
   if (/invalid login credentials/i.test(message)) return 'E-mail ou senha incorretos.';
   if (/email not confirmed/i.test(message)) return 'Confirme seu e-mail pelo link enviado antes de entrar.';
-  if (/rate limit|too many/i.test(message)) return 'Muitas tentativas. Aguarde alguns minutos.';
+  if (/rate limit|too many/i.test(message)) {
+    return 'Limite de envio de e-mails do Supabase atingido. Aguarde ou configure um SMTP próprio / desative a confirmação de e-mail.';
+  }
+  if (/error sending|sending (confirmation|recovery|magic)|smtp|not authorized/i.test(message)) {
+    return 'O Supabase não conseguiu enviar o e-mail de confirmação. Configure um SMTP próprio ou desative "Confirm email" em Authentication.';
+  }
+  if (/database error/i.test(message)) return 'Erro no banco ao criar o usuário. Verifique se a migração foi aplicada.';
+  if (/invalid api key|no api key/i.test(message)) return 'Chave do Supabase inválida. Confira VITE_SUPABASE_ANON_KEY na hospedagem.';
+  if (/signups not allowed|signup.*disabled/i.test(message)) return 'Novos cadastros estão desativados no Supabase.';
   if (/password/i.test(message) && /(short|least|weak)/i.test(message)) return 'Senha fraca: use ao menos 8 caracteres.';
-  if (/fetch|network/i.test(message)) return 'Falha de conexão. Tente novamente.';
-  return 'Não foi possível concluir. Verifique os dados e tente novamente.';
+  if (/fetch|network/i.test(message)) return 'Falha de conexão com o Supabase. Confira VITE_SUPABASE_URL.';
+  return `Não foi possível concluir. Detalhe técnico: ${message.slice(0, 200)}`;
 }
 
 export function LoginPage() {
