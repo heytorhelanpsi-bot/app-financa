@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { friendlyError } from '@/lib/errors';
 import type { Theme, Transaction } from '@/lib/types';
 import { CategoryManager } from '@/features/categories/CategoryManager';
+import { FinancialProfileForm } from '@/features/advisor/FinancialProfileForm';
+import { useLocation } from 'react-router-dom';
 import { exportAllData, exportTransactionsCsv } from '@/features/export';
 
 const TIMEZONES = [
@@ -24,6 +26,11 @@ export function SettingsPage() {
   const [password, setPassword] = useState('');
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwPending, setPwPending] = useState(false);
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash && profile.data) document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' });
+  }, [location.hash, !!profile.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (profile.data) setName(profile.data.display_name ?? '');
@@ -104,6 +111,8 @@ export function SettingsPage() {
         </div>
         <p className="text-xs text-muted sm:col-span-2">Moeda: {p.currency_code}</p>
       </section>
+
+      <FinancialProfileForm profile={p} />
 
       <CategoryManager />
 

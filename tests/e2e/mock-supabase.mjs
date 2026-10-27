@@ -13,8 +13,10 @@ pg.types.setTypeParser(1082, (v) => v);
 pg.types.setTypeParser(20, (v) => Number(v));
 const pool = new pg.Pool({ connectionString: DB_URL, max: 10 });
 const SECRET = 'e2e-secret';
-const TABLES = new Set(['profiles', 'accounts', 'categories', 'transactions', 'audit_logs', 'account_balances']);
-const RPCS = new Set(['settle_transaction', 'create_transfer', 'adjust_account_balance', 'reverse_transaction', 'financial_summary']);
+const TABLES = new Set(['profiles', 'accounts', 'categories', 'transactions', 'audit_logs', 'account_balances', 'debts', 'debt_balances', 'debt_payments', 'debt_charges', 'advisor_reports']);
+const RPCS = new Set(['settle_transaction', 'create_transfer', 'adjust_account_balance', 'reverse_transaction', 'financial_summary', 'pay_debt', 'add_debt_charge', 'reorder_debts', 'balance_projection']);
+const SET_RETURNING = new Set(['balance_projection']);
+const VOID_RPCS = new Set(['reorder_debts']);
 
 await pool.query(`create table if not exists public.e2e_passwords (user_id uuid primary key, email text unique, password text)`);
 
@@ -122,6 +124,26 @@ const server = http.createServer(async (req, res) => {
       return send(res, 404, { msg: 'not found' });
     }
 
+    // ------------------------------------------------------------- Functions
+    // Somente para testes de interface: devolve uma análise fixa, sem IA real.
+    if (url.pathname === '/functions/v1/advisor') {
+      if (!claims) return send(res, 401, { error: 'Sessão inválida.' });
+      const body = (await readBody(req)) ?? {};
+      const consent = await asUser(claims, 'select ai_consent_at from public.profiles');
+      if (!consent.rows[0]?.ai_consent_at) return send(res, 403, { error: 'Ative o assistente de IA em Configurações → Perfil financeiro.' });
+      const debts = await asUser(claims, "select d.id, d.creditor_name, b.outstanding_cents from public.debts d join public.debt_balances b on b.debt_id = d.id where d.debt_status = 'active' order by d.is_essential desc, d.priority_rank");
+      const advice = {
+        diagnostico: '[TESTE] Análise simulada para teste de interface.',
+        ordem: debts.rows.map((d, i) => ({ debt_id: d.id, motivo: `[TESTE] posição ${i + 1}`, pagamento_sugerido_centavos: Math.min(Number(d.outstanding_cents), 10000) })),
+        plano: [{ titulo: '[TESTE] Passo 1', detalhe: 'Detalhe do passo.', quando: 'hoje' }],
+        recomendacoes: [{ titulo: '[TESTE] Evite o giro de limite', detalhe: 'Detalhe.', impacto: 'alto', tipo: 'evitar_juros' }],
+        alertas: [],
+        perguntas: ['[TESTE] Qual a taxa da maquininha?'],
+      };
+      const r = await asUser(claims, 'insert into public.advisor_reports (model, question, available_cents, advice) values ($1, $2, $3, $4) returning id, created_at, model, question, available_cents, advice', ['mock-test', body.question ?? null, body.available_cents ?? 0, advice]);
+      return send(res, 200, r.rows[0]);
+    }
+
     // ------------------------------------------------------------- REST
     if (!url.pathname.startsWith('/rest/v1/')) return send(res, 404, { message: 'not found' });
     const name = url.pathname.slice(9);
@@ -134,7 +156,16 @@ const server = http.createServer(async (req, res) => {
       if (!RPCS.has(fn)) return send(res, 404, { code: 'PGRST202', message: 'function not found' });
       const body = (await readBody(req)) ?? {};
       const args = Object.entries(body).map(([k, v]) => { values.push(Array.isArray(v) ? v : v); return `${qi(k)} => $${values.length}`; });
-      const r = await asUser(claims, `select to_jsonb(public.${qi(fn)}(${args.join(', ')})) as r`, values);
+      const call = `public.${qi(fn)}(${args.join(', ')})`;
+      if (SET_RETURNING.has(fn)) {
+        const r = await asUser(claims, `select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb) as r from ${call} t`, values);
+        return send(res, 200, r.rows[0].r);
+      }
+      if (VOID_RPCS.has(fn)) {
+        await asUser(claims, `select ${call}`, values);
+        return send(res, 200, null);
+      }
+      const r = await asUser(claims, `select to_jsonb(${call}) as r`, values);
       return send(res, 200, r.rows[0].r);
     }
 

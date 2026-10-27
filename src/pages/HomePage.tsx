@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState, Money, QueryError, Spinner, Toggle } from '@/components/ui';
 import { IconAlert } from '@/components/icons';
-import { useAccounts, useCategories, useOpenTransactions, useProfile, useSummary } from '@/hooks/data';
+import { useAccounts, useCategories, useOpenTransactions, useProfile, useProjection, useSummary } from '@/hooks/data';
+import { ProjectionChart } from '@/components/ProjectionChart';
 import { useToday } from '@/hooks/useToday';
 import { formatDate, formatDayHeader, formatPeriod, isValidISODate, periodFor, type PeriodKind } from '@/lib/dates';
 import type { Account, Category, Transaction } from '@/lib/types';
@@ -61,6 +62,13 @@ export function HomePage() {
   const accounts = useAccounts();
   const categories = useCategories().data ?? [];
   const upcoming = useOpenTransactions(period.end);
+  const projectionEnd = period.end >= today ? period.end : today;
+  const projection = useProjection({
+    end: projectionEnd,
+    includeForecastExpenses: forecastExpenses,
+    includePendingIncome: true,
+    includeForecastIncome: forecastIncome,
+  });
 
   if (accounts.isLoading || summary.isLoading) return <Spinner />;
   if (summary.error) return <QueryError error={summary.error} onRetry={() => summary.refetch()} />;
@@ -221,6 +229,21 @@ export function HomePage() {
         )}
       </section>
 
+      {/* Projeção diária */}
+      {projection.data && projection.data.length > 1 && (
+        <section className="card" aria-label="Projeção do saldo">
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-base font-semibold tracking-tight">Saldo dia a dia até {formatDate(projectionEnd)}</h2>
+            <ProjectionNote points={projection.data} />
+          </div>
+          <ProjectionChart points={projection.data} />
+          <p className="mt-1 text-xs text-muted">
+            Considera contas a pagar, parcelas de dívidas e receitas pendentes
+            {forecastIncome ? ' e previstas' : ' (receitas previstas ficam de fora)'}. Itens vencidos entram hoje.
+          </p>
+        </section>
+      )}
+
       {/* Despesas x Receitas */}
       <div className="grid gap-4 md:grid-cols-2">
         <FlowCard
@@ -229,6 +252,9 @@ export function HomePage() {
           mainLabel="Pagas no período"
           main={s.expenses.paid_cents}
           rows={[
+            ...(Number(s.debts.due_count) > 0
+              ? ([['Parcelas de dívidas a vencer', s.debts.due_cents, 'text-expense', 'bg-sunset']] as [string, number, string, string][])
+              : []),
             ['Registradas e pendentes', s.expenses.pending_cents, 'text-expense', 'bg-expense'],
             ['Previstas', s.expenses.forecast_cents, 'text-expense-forecast', 'bg-expense-forecast'],
           ]}
@@ -382,5 +408,22 @@ function UpcomingList({
         </ul>
       )}
     </section>
+  );
+}
+
+function ProjectionNote({ points }: { points: { day: string; balance_cents: number }[] }) {
+  const firstNegative = points.find((p) => Number(p.balance_cents) < 0);
+  const min = points.reduce((a, p) => (Number(p.balance_cents) < Number(a.balance_cents) ? p : a), points[0]);
+  if (firstNegative) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs font-semibold text-expense">
+        <IconAlert width={13} height={13} /> Fica negativo em {formatDate(firstNegative.day)}
+      </span>
+    );
+  }
+  return (
+    <span className="text-xs text-muted">
+      Menor saldo: <Money cents={min.balance_cents} className="font-semibold text-fg" /> em {formatDate(min.day)}
+    </span>
   );
 }

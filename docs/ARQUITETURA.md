@@ -117,7 +117,7 @@ Projeções considerarão a fatura (e não as compras individuais) para não des
 | Fase | Conteúdo | Estado |
 |---|---|---|
 | 1 — Fundação | Autenticação, banco, RLS, layout responsivo, contas, categorias, receitas/despesas, transferências, ajustes, estornos, resumo da tela inicial, sincronização, exportação, PWA | **Implementada** |
-| 2 — Dívidas | `debts`, `debt_payments`, Ordem de Pagamento manual (arrastar/soltar + subir/descer), ordem sugerida com justificativa, simulação sem efeito no saldo, pagamentos parciais com principal/juros, projeção diária | Próxima |
+| 2 — Dívidas | `debts`, `debt_payments`, `debt_charges`, Ordem de Pagamento manual (arrastar/soltar + subir/descer), ordem sugerida com justificativa, simulação sem efeito no saldo, pagamentos parciais com principal/encargos, projeção diária, assistente de IA com perfil financeiro | **Implementada** |
 | 3 — Cartões e compromissos | Cartões, faturas, parcelamentos, recorrências (geração idempotente por `(recurrence_id, occurrence_date)` único), calendário, projeções 7/15/30 dias | Planejada |
 | 4 — Avançado | Relatórios, PDF, importação CSV/OFX com conciliação, alertas, camada de provedores Open Finance | Planejada |
 
@@ -128,8 +128,39 @@ Projeções considerarão a fatura (e não as compras individuais) para não des
 - **E-mail de autenticação:** o SMTP padrão do Supabase tem limite baixo de envios por hora; em produção configure um SMTP
   próprio (ex.: Resend, SES).
 - **Hospedagem estática:** planos gratuitos de Vercel/Netlify/Cloudflare Pages costumam bastar para uso pessoal.
+- **Assistente de IA:** requer chave paga da Anthropic (cobrança por uso; ver README). Sem a chave, a ordem sugerida
+  por regras continua funcionando.
 - **Open Finance:** exige provedor autorizado/agregador (ex.: Pluggy, Belvo, Celcoin e outros). Nenhum foi contratado;
   custos, cobertura de instituições e limites precisam ser comparados antes da Fase 4. Até lá **não há sincronização
   bancária automática** e o app não pede nem guarda senhas bancárias.
 - **Modo offline:** o PWA abre sem internet, mas alterações exigem conexão (o app avisa e não enfileira operações
   financeiras, para evitar duplicidades e conflitos silenciosos).
+
+## 7. Fase 2 — dívidas e assistente
+
+**Saldo devedor derivado** (view `debt_balances`):
+`principal em aberto = saldo de partida − Σ principal pago` e
+`encargos em aberto = max(0, Σ juros/multas/tarifas − Σ descontos − Σ encargos pagos)`.
+`debts.original_amount_cents` é o saldo de partida (o valor contratado, informativo, fica em `contracted_amount_cents`);
+depois do primeiro pagamento ele não pode mais ser editado. Encargos e pagamentos são imutáveis e só nascem pelas RPCs.
+
+**`pay_debt`** (atômica, idempotente, com `SELECT … FOR UPDATE` na dívida): valida que o principal não excede o
+principal em aberto, cria a despesa paga na conta escolhida e o registro em `debt_payments`, quita a dívida quando o
+saldo chega a zero e, se pedido, avança o vencimento. **Estornar** a saída bancária marca o pagamento como estornado
+(trigger) e reabre a dívida; não é criada despesa avulsa, porque a própria dívida volta a cobrar o valor.
+
+**Comprometido e projeção:** cada dívida ativa contribui com o valor devido no próximo vencimento (parcela, senão
+mínimo, senão o saldo) se o vencimento cair até o fim do período. `balance_projection` acumula, dia a dia, entradas e
+saídas em aberto e parcelas; itens vencidos entram no dia de hoje. Para não contar duas vezes, registre a obrigação
+**ou** como dívida **ou** como conta a pagar em Movimentações.
+
+**Ordem sugerida (regras, sem IA):** pontua essencialidade, consequência do atraso (corte de serviço essencial, perda de
+bem, dívida com pessoa, cobrança judicial, negativação, juros altos), atraso/vencimento próximo, juros, prioridade
+informada e capacidade de pagamento, e mostra os três motivos de maior peso.
+
+**Assistente de IA:** Edge Function `advisor` (Deno) com o modelo `claude-opus-5-5`, saída em JSON validada por esquema
+(`output_config.format`), `fallbacks: "default"` (se o modelo recusar por política, a API refaz o pedido num modelo de
+reserva) e esforço `medium`. A função lê os dados com o JWT do próprio usuário (RLS), exige consentimento
+(`profiles.ai_consent_at`), limita a 10 análises por dia, valida a resposta (só ids de dívidas existentes, pagamentos
+dentro do saldo) e guarda o resultado em `advisor_reports`. A sugestão nunca altera a ordem manual sem confirmação.
+Senhas e dados de acesso bancário não existem no app e nunca são enviados.
