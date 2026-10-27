@@ -28,7 +28,7 @@ interface NavItem {
 export const NAV: NavItem[] = [
   { to: '/', label: 'Início', short: 'Início', icon: IconHome },
   { to: '/movimentacoes', label: 'Movimentações', short: 'Lançamentos', icon: IconList },
-  { to: '/ordem-de-pagamento', label: 'Ordem de Pagamento', short: 'Ordem', icon: IconQueue, phase: 2 },
+  { to: '/ordem-de-pagamento', label: 'Ordem de Pagamento', short: 'Ordem', icon: IconQueue },
   { to: '/contas', label: 'Contas e Bancos', short: 'Contas', icon: IconBank },
   { to: '/cartoes', label: 'Cartões e Faturas', short: 'Cartões', icon: IconCard, phase: 3 },
   { to: '/calendario', label: 'Calendário', short: 'Calendário', icon: IconCalendar, phase: 3 },
@@ -36,7 +36,7 @@ export const NAV: NavItem[] = [
   { to: '/configuracoes', label: 'Configurações', short: 'Ajustes', icon: IconSettings },
 ];
 
-const MOBILE_PRIMARY = ['/', '/movimentacoes', '/contas'];
+const MOBILE_PRIMARY = ['/', '/movimentacoes', '/ordem-de-pagamento'];
 
 function SideLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   return (
@@ -125,7 +125,7 @@ export function AppLayout() {
           >
             <IconPlus width={22} height={22} />
           </button>
-          <BottomLink item={NAV.find((n) => n.to === '/contas')!} />
+          <BottomLink item={NAV.find((n) => n.to === '/ordem-de-pagamento')!} />
           <button
             className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
               moreActive ? 'bg-white/10 text-[#F88F22]' : 'text-[#a8988a] hover:text-white'

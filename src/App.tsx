@@ -14,6 +14,7 @@ import { TransactionsPage } from '@/pages/TransactionsPage';
 import { AccountsPage } from '@/pages/AccountsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
+import { PaymentOrderPage } from '@/pages/PaymentOrderPage';
 import {
   ForgotPasswordPage,
   LoginPage,
@@ -45,7 +46,7 @@ function AuthenticatedApp({ userId }: { userId: string }) {
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path="movimentacoes" element={<TransactionsPage />} />
-            <Route path="ordem-de-pagamento" element={<ComingSoonPage area="ordem" />} />
+            <Route path="ordem-de-pagamento" element={<PaymentOrderPage />} />
             <Route path="contas" element={<AccountsPage />} />
             <Route path="cartoes" element={<ComingSoonPage area="cartoes" />} />
             <Route path="calendario" element={<ComingSoonPage area="calendario" />} />
