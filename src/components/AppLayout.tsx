@@ -46,7 +46,7 @@ function SideLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
       onClick={onClick}
       className={({ isActive }) =>
         `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-          isActive ? 'bg-surface-2 text-fg' : 'text-muted hover:bg-surface-2/60 hover:text-fg'
+          isActive ? 'bg-accent/10 text-fg' : 'text-muted hover:bg-surface-2/60 hover:text-fg'
         }`
       }
     >
@@ -77,7 +77,7 @@ export function AppLayout() {
   return (
     <div className="min-h-dvh lg:flex">
       {/* Menu lateral (desktop) */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line/60 px-4 py-6 lg:flex">
+      <aside className="glass sticky top-0 hidden h-dvh w-64 shrink-0 flex-col rounded-none border-y-0 border-l-0 px-4 py-6 lg:flex">
         <div className="mb-8 px-2">
           <Logo />
         </div>
@@ -95,40 +95,46 @@ export function AppLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line/50 bg-bg/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+        <header className="sticky top-0 z-20 flex items-center justify-between bg-bg/70 px-4 py-3 backdrop-blur-xl lg:hidden">
           <Logo />
           <SyncIndicator />
         </header>
         <OfflineBanner />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
+        <main key={location.pathname} className="animate-rise mx-auto w-full max-w-6xl flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
           <Outlet />
         </main>
       </div>
 
-      {/* Navegação inferior flutuante (celular) */}
-      <nav className="fixed inset-x-3 bottom-3 z-30 lg:hidden" aria-label="Principal" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="grid grid-cols-5 items-center rounded-2xl border border-line/70 bg-surface/85 px-1 py-1.5 shadow-2xl backdrop-blur-xl">
+      {/* Navegação inferior em pílula flutuante (celular) */}
+      <nav
+        className="fixed inset-x-0 bottom-4 z-30 flex justify-center px-4 lg:hidden"
+        aria-label="Principal"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#1a1411]/90 p-1.5 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)] backdrop-blur-xl">
           {NAV.filter((n) => MOBILE_PRIMARY.includes(n.to))
             .slice(0, 2)
             .map((item) => (
               <BottomLink key={item.to} item={item} />
             ))}
-          <div className="flex justify-center">
-            <button
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-[rgb(var(--accent-fg))] transition active:scale-95 dark:shadow-[0_0_0_1px_rgb(0_229_255/0.5),0_10px_30px_-8px_rgb(0_229_255/0.8)]"
-              onClick={() => openNew('expense')}
-              aria-label="Novo lançamento"
-            >
-              <IconPlus width={22} height={22} />
-            </button>
-          </div>
+          <button
+            className="mx-1 flex h-12 w-12 items-center justify-center rounded-full bg-sunset text-[#1e0f05] shadow-[0_8px_24px_-6px_rgba(234,97,19,0.9)] transition active:scale-95"
+            onClick={() => openNew('expense')}
+            aria-label="Novo lançamento"
+            title="Novo lançamento"
+          >
+            <IconPlus width={22} height={22} />
+          </button>
           <BottomLink item={NAV.find((n) => n.to === '/contas')!} />
           <button
-            className={`flex flex-col items-center gap-1 py-1.5 text-[10px] font-medium ${moreActive ? 'text-accent' : 'text-muted'}`}
+            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
+              moreActive ? 'bg-white/10 text-[#F88F22]' : 'text-[#a8988a] hover:text-white'
+            }`}
             onClick={() => setMoreOpen(true)}
+            aria-label="Mais opções"
+            title="Mais opções"
           >
             <IconMore width={20} height={20} />
-            Mais
           </button>
         </div>
       </nav>
@@ -149,12 +155,20 @@ function BottomLink({ item }: { item: NavItem }) {
     <NavLink
       to={item.to}
       end={item.to === '/'}
+      aria-label={item.label}
+      title={item.label}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-1 py-1.5 text-[10px] font-medium transition ${isActive ? 'text-accent' : 'text-muted'}`
+        `relative flex h-12 w-12 items-center justify-center rounded-full transition ${
+          isActive ? 'bg-white/10 text-[#F88F22]' : 'text-[#a8988a] hover:text-white'
+        }`
       }
     >
-      <item.icon width={20} height={20} />
-      {item.short}
+      {({ isActive }) => (
+        <>
+          <item.icon width={20} height={20} />
+          {isActive && <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-[#F88F22] shadow-[0_0_8px_#F88F22]" aria-hidden />}
+        </>
+      )}
     </NavLink>
   );
 }

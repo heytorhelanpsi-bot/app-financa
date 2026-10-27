@@ -10,21 +10,21 @@ function AuthShell({ title, children, footer }: { title: string; children: React
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[18%] h-72 w-72 -translate-x-1/2 rounded-full bg-accent/20 blur-[110px] dark:bg-accent/25"
+        className="pointer-events-none absolute left-1/2 top-[10%] h-80 w-80 -translate-x-1/2 rounded-full bg-sunset opacity-40 blur-[120px]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute left-[60%] top-[38%] h-56 w-56 -translate-x-1/2 rounded-full bg-income/10 blur-[110px]"
+        className="pointer-events-none absolute left-[70%] top-[45%] h-56 w-56 -translate-x-1/2 rounded-full bg-[#EA6113] opacity-20 blur-[110px]"
       />
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <Logo compact />
+          <Logo compact size={56} />
           <div>
-            <p className="text-xl font-semibold tracking-tight">Financeiro Pessoal</p>
+            <p className="text-2xl font-bold tracking-tight">Financeiro <span className="text-sunset">Pessoal</span></p>
             <p className="mt-1 text-sm text-muted">Saiba quanto você pode gastar, sem surpresas.</p>
           </div>
         </div>
-        <div className="rounded-3xl border border-line/70 bg-surface/90 p-7 shadow-2xl backdrop-blur">
+        <div className="glass rounded-[2rem] p-7 shadow-2xl">
           <h1 className="mb-5 text-lg font-semibold tracking-tight">{title}</h1>
           {children}
         </div>

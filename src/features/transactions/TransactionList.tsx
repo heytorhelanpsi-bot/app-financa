@@ -44,9 +44,9 @@ export function TransactionRow({
   const glyph = tx.transaction_type === 'transfer' ? '⇄' : tx.transaction_type === 'reversal' ? '↺' : tx.transaction_type === 'adjustment' ? '±' : tx.direction === 'out' ? '↑' : '↓';
 
   return (
-    <li className="group flex items-center gap-3.5 px-4 py-3 transition hover:bg-surface-2/50">
+    <li className="group flex items-center gap-3.5 px-4 py-3.5 transition hover:bg-accent/5">
       <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+        className="icon-bubble"
         style={{ color: tint, background: `color-mix(in srgb, ${tint} 14%, transparent)` }}
         aria-hidden
       >

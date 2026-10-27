@@ -3,45 +3,52 @@
 @tailwind utilities;
 
 /*
- * Sistema visual: minimalismo + neon.
- * Superfícies grafite discretas, linhas finas e cor apenas onde há significado:
- *   vermelho neon = saída efetiva · laranja suave = saída prevista
- *   verde neon    = entrada efetiva · verde suave  = entrada prevista
- *   ciano neon    = ação / destaque
+ * Sistema visual "Sunset": grafite quente, vidro translúcido e degradês de
+ * pôr do sol (#EA6113 → #F88F22 → #FBB931 → #FFE3B3) como identidade e ação.
+ * Semântica financeira preservada:
+ *   vermelho = saída efetiva · pêssego = saída prevista
+ *   verde    = entrada efetiva · verde suave = entrada prevista
  */
 :root {
-  --bg: 246 247 249;
+  --sun-1: 234 97 19; /* #EA6113 */
+  --sun-2: 248 143 34; /* #F88F22 */
+  --sun-3: 251 185 49; /* #FBB931 */
+  --sun-4: 255 227 179; /* #FFE3B3 */
+
+  --bg: 252 247 241;
   --surface: 255 255 255;
-  --surface-2: 241 243 246;
-  --line: 226 229 235;
-  --fg: 15 17 22;
-  --muted: 105 112 126;
-  --expense: 226 29 86;
-  --expense-forecast: 212 118 36;
-  --income: 0 158 98;
-  --income-forecast: 64 150 108;
-  --accent: 0 136 204;
+  --surface-2: 247 239 230;
+  --line: 236 224 211;
+  --fg: 33 22 15;
+  --muted: 128 110 96;
+  --expense: 220 38 62;
+  --expense-forecast: 214 120 52;
+  --income: 0 150 92;
+  --income-forecast: 70 150 110;
+  --accent: 234 97 19;
   --accent-fg: 255 255 255;
-  --warn: 186 128 0;
-  --glow: 0;
+  --warn: 196 132 0;
+  --glass: 255 255 255;
+  --glass-alpha: 0.75;
   color-scheme: light;
 }
 
 .dark {
-  --bg: 10 11 14;
-  --surface: 18 20 25;
-  --surface-2: 26 29 35;
-  --line: 38 42 50;
-  --fg: 238 241 246;
-  --muted: 134 141 156;
-  --expense: 255 61 113;
-  --expense-forecast: 255 172 104;
-  --income: 0 255 163;
-  --income-forecast: 128 222 172;
-  --accent: 0 229 255;
-  --accent-fg: 6 16 20;
-  --warn: 255 210 64;
-  --glow: 1;
+  --bg: 16 12 10;
+  --surface: 27 21 18;
+  --surface-2: 38 30 26;
+  --line: 58 47 40;
+  --fg: 252 245 236;
+  --muted: 170 152 138;
+  --expense: 255 82 99;
+  --expense-forecast: 255 182 128;
+  --income: 70 240 160;
+  --income-forecast: 150 216 180;
+  --accent: 248 143 34;
+  --accent-fg: 30 15 5;
+  --warn: 251 185 49;
+  --glass: 255 255 255;
+  --glass-alpha: 0.035;
   color-scheme: dark;
 }
 
@@ -52,40 +59,116 @@ body,
 }
 
 body {
-  @apply bg-bg text-fg antialiased;
-  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  @apply bg-bg font-sans text-fg antialiased;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Luz ambiente sutil no topo (apenas tema escuro). */
-.dark body {
   background-image:
-    radial-gradient(60rem 28rem at 15% -10%, rgb(0 229 255 / 0.07), transparent 60%),
-    radial-gradient(50rem 24rem at 95% -5%, rgb(0 255 163 / 0.05), transparent 60%);
+    radial-gradient(55rem 30rem at 85% -12%, rgb(var(--sun-3) / 0.16), transparent 60%),
+    radial-gradient(45rem 28rem at -10% 10%, rgb(var(--sun-1) / 0.08), transparent 60%);
   background-attachment: fixed;
 }
 
+.dark body {
+  background-image:
+    radial-gradient(60rem 32rem at 90% -15%, rgb(var(--sun-1) / 0.22), transparent 60%),
+    radial-gradient(40rem 26rem at -10% 0%, rgb(var(--sun-2) / 0.08), transparent 60%),
+    radial-gradient(70rem 40rem at 50% 120%, rgb(120 60 30 / 0.18), transparent 60%);
+}
+
 ::selection {
-  background: rgb(var(--accent) / 0.25);
+  background: rgb(var(--sun-2) / 0.3);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-12px, 10px) scale(1.06);
+  }
 }
 
 @layer components {
-  /* ---------------------------------------------------------- superfícies */
+  /* ---------------------------------------------------------- superfícies de vidro */
+  .glass {
+    background: linear-gradient(180deg, rgb(var(--glass) / calc(var(--glass-alpha) + 0.02)), rgb(var(--glass) / var(--glass-alpha)));
+    @apply border border-line/60 backdrop-blur-xl;
+  }
+  .dark .glass {
+    border-color: rgb(255 255 255 / 0.07);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
   .card {
-    @apply rounded-2xl border border-line/70 bg-surface p-5;
+    @apply glass rounded-3xl p-5;
   }
   .card-flat {
-    @apply rounded-2xl border border-line/70 bg-surface;
+    @apply glass rounded-3xl;
   }
+
+  /* Cartão principal: vidro escuro com um "sol" em degradê. */
   .hero {
-    @apply relative overflow-hidden rounded-3xl border border-line/70 bg-surface p-6 md:p-8;
-  }
-  .dark .hero {
+    @apply relative isolate overflow-hidden rounded-[2rem] border p-6 text-white md:p-8;
+    border-color: rgb(255 255 255 / 0.08);
     background:
-      radial-gradient(40rem 16rem at 0% 0%, rgb(0 229 255 / 0.08), transparent 70%),
-      radial-gradient(30rem 14rem at 100% 100%, rgb(0 255 163 / 0.06), transparent 70%),
+      linear-gradient(160deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 40%),
+      linear-gradient(180deg, #221813, #140f0c);
+    box-shadow: 0 30px 70px -35px rgb(var(--sun-1) / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 20rem;
+    height: 20rem;
+    right: -8rem;
+    top: -10rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 40% 40%, rgb(var(--sun-3)), rgb(var(--sun-2)) 35%, rgb(var(--sun-1)) 60%, transparent 70%);
+    filter: blur(28px);
+    opacity: 0.7;
+    animation: drift 14s ease-in-out infinite;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(210deg, rgb(20 15 12 / 0) 10%, rgb(20 15 12 / 0.55) 40%, rgb(20 15 12 / 0.9) 75%);
+  }
+  /* Dentro do hero o texto é sempre claro, mesmo no tema claro. */
+  .hero .text-muted {
+    color: rgb(214 196 182);
+  }
+  .hero .eyebrow {
+    color: rgb(var(--sun-4) / 0.75);
+  }
+  /* Cores semânticas na versão luminosa sobre o fundo escuro do cartão. */
+  .hero .text-income {
+    color: rgb(70 240 160);
+  }
+  .hero .text-income-forecast {
+    color: rgb(150 216 180);
+  }
+  .hero .text-expense {
+    color: rgb(255 92 108);
+  }
+  .hero-soft {
+    @apply relative isolate overflow-hidden rounded-[2rem] border p-6;
+    border-color: rgb(var(--sun-2) / 0.25);
+    background:
+      radial-gradient(28rem 14rem at 100% 0%, rgb(var(--sun-2) / 0.22), transparent 70%),
       rgb(var(--surface));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 30px 60px -40px rgb(0 229 255 / 0.25);
   }
 
   /* ---------------------------------------------------------- tipografia */
@@ -94,17 +177,30 @@ body {
   }
   .tabular {
     font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum', 'cv11';
+  }
+  .text-sunset {
+    background: linear-gradient(90deg, rgb(var(--sun-1)), rgb(var(--sun-2)), rgb(var(--sun-3)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* ---------------------------------------------------------- formulários */
   .input {
-    @apply h-11 w-full rounded-xl border border-line bg-surface-2/60 px-3.5 text-sm text-fg transition
+    @apply h-12 w-full rounded-2xl border border-line bg-surface-2/50 px-4 text-sm text-fg transition
       placeholder:text-muted/70 focus:border-accent/70 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-accent/15
       disabled:opacity-60;
   }
+  .dark .input {
+    background-color: rgb(255 255 255 / 0.04);
+    border-color: rgb(255 255 255 / 0.08);
+  }
+  .dark .input:focus {
+    border-color: rgb(var(--sun-2) / 0.7);
+    background-color: rgb(255 255 255 / 0.06);
+  }
   textarea.input {
-    @apply h-auto py-2.5;
+    @apply h-auto py-3;
   }
   .label {
     @apply mb-1.5 block text-xs font-medium text-muted;
@@ -112,45 +208,58 @@ body {
 
   /* ---------------------------------------------------------- botões */
   .btn {
-    @apply inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-semibold transition
-      focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 active:scale-[0.98]
+    @apply inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 text-sm font-semibold transition duration-200
+      focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 active:scale-[0.97]
       disabled:pointer-events-none disabled:opacity-45;
   }
   .btn-primary {
-    @apply btn bg-accent text-[rgb(var(--accent-fg))] hover:brightness-110;
+    @apply btn text-[rgb(30_15_5)];
+    background: linear-gradient(100deg, rgb(var(--sun-1)), rgb(var(--sun-2)) 55%, rgb(var(--sun-3)));
+    box-shadow: 0 10px 30px -12px rgb(var(--sun-1) / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.35);
   }
-  .dark .btn-primary {
-    box-shadow: 0 0 0 1px rgb(0 229 255 / 0.5), 0 8px 28px -10px rgb(0 229 255 / 0.7);
+  .btn-primary:hover {
+    filter: brightness(1.07) saturate(1.05);
+    box-shadow: 0 14px 36px -12px rgb(var(--sun-1) / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.35);
   }
   .btn-secondary {
-    @apply btn border border-line bg-surface text-fg hover:border-muted/40 hover:bg-surface-2;
+    @apply btn glass text-fg hover:border-accent/40;
   }
   .btn-danger {
     @apply btn border border-expense/40 bg-expense/10 text-expense hover:bg-expense/20;
   }
   .btn-ghost {
-    @apply btn text-muted hover:bg-surface-2 hover:text-fg;
+    @apply btn text-muted hover:bg-surface-2/70 hover:text-fg;
+  }
+  .dark .btn-ghost:hover {
+    background-color: rgb(255 255 255 / 0.06);
   }
   .btn-sm {
-    @apply h-8 rounded-lg px-3 text-xs;
+    @apply h-8 px-3.5 text-xs;
+  }
+  .btn-icon {
+    @apply btn h-10 w-10 px-0;
   }
   .pill-action {
-    @apply inline-flex h-7 items-center rounded-full border border-accent/40 px-3 text-xs font-semibold text-accent transition
-      hover:bg-accent/10 active:scale-95;
+    @apply inline-flex h-7 items-center rounded-full px-3 text-xs font-semibold transition active:scale-95;
+    color: rgb(var(--accent));
+    background: rgb(var(--sun-2) / 0.12);
+    box-shadow: inset 0 0 0 1px rgb(var(--sun-2) / 0.35);
+  }
+  .pill-action:hover {
+    background: rgb(var(--sun-2) / 0.2);
   }
 
   /* ---------------------------------------------------------- seletores */
   .segmented {
-    @apply inline-flex flex-wrap gap-1 rounded-xl border border-line/70 bg-surface-2/60 p-1;
+    @apply glass inline-flex flex-wrap gap-1 rounded-full p-1;
   }
   .chip {
-    @apply inline-flex h-8 items-center rounded-lg px-3 text-xs font-semibold text-muted transition hover:text-fg;
+    @apply inline-flex h-9 items-center justify-center rounded-full px-4 text-xs font-semibold text-muted transition duration-200 hover:text-fg;
   }
   .chip-active {
-    @apply bg-surface text-fg shadow-sm ring-1 ring-line;
-  }
-  .dark .chip-active {
-    box-shadow: 0 0 0 1px rgb(0 229 255 / 0.35), 0 0 18px -6px rgb(0 229 255 / 0.6);
+    color: rgb(30 15 5) !important;
+    background: linear-gradient(100deg, rgb(var(--sun-1)), rgb(var(--sun-2)));
+    box-shadow: 0 6px 18px -8px rgb(var(--sun-1) / 0.9);
   }
 
   /* ---------------------------------------------------------- detalhes */
@@ -158,29 +267,62 @@ body {
     @apply inline-block h-2 w-2 shrink-0 rounded-full;
   }
   .link {
-    @apply text-xs font-semibold text-accent hover:underline;
+    @apply text-xs font-semibold text-accent transition hover:opacity-80;
+  }
+  .icon-bubble {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold;
+  }
+  .animate-rise {
+    animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 }
 
 @layer utilities {
-  /* Brilho neon nos números-chave (somente no tema escuro). */
+  /* Brilho sutil nos números-chave (tema escuro). */
   .dark .glow-income {
-    text-shadow: 0 0 28px rgb(0 255 163 / 0.35);
+    text-shadow: 0 0 26px rgb(var(--income) / 0.35);
   }
   .dark .glow-expense {
-    text-shadow: 0 0 28px rgb(255 61 113 / 0.35);
+    text-shadow: 0 0 26px rgb(var(--expense) / 0.35);
   }
   .dark .glow-accent {
-    text-shadow: 0 0 28px rgb(0 229 255 / 0.35);
+    text-shadow: 0 0 26px rgb(var(--sun-2) / 0.45);
   }
   .dark .glow-dot-income {
-    box-shadow: 0 0 10px rgb(0 255 163 / 0.8);
+    box-shadow: 0 0 10px rgb(var(--income) / 0.8);
   }
   .dark .glow-dot-expense {
-    box-shadow: 0 0 10px rgb(255 61 113 / 0.8);
+    box-shadow: 0 0 10px rgb(var(--expense) / 0.8);
   }
   .dark .glow-dot-accent {
-    box-shadow: 0 0 10px rgb(0 229 255 / 0.8);
+    box-shadow: 0 0 10px rgb(var(--sun-2) / 0.9);
+  }
+  .bg-sunset {
+    background: linear-gradient(100deg, rgb(var(--sun-1)), rgb(var(--sun-2)) 55%, rgb(var(--sun-3)));
+  }
+  .bar-expense {
+    background: linear-gradient(90deg, rgb(var(--expense)), rgb(var(--sun-1)));
+  }
+  .bar-income {
+    background: linear-gradient(90deg, rgb(var(--income) / 0.75), rgb(var(--income)));
+  }
+  .stagger > * {
+    animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .stagger > *:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .stagger > *:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  .stagger > *:nth-child(4) {
+    animation-delay: 180ms;
+  }
+  .stagger > *:nth-child(5) {
+    animation-delay: 240ms;
+  }
+  .stagger > *:nth-child(n + 6) {
+    animation-delay: 300ms;
   }
 }
 
@@ -189,11 +331,14 @@ body {
 }
 
 dialog::backdrop {
-  backdrop-filter: blur(4px);
+  background: rgb(10 7 5 / 0.6);
+  backdrop-filter: blur(6px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
     animation: none !important;
   }

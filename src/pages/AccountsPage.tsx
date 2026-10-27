@@ -42,7 +42,7 @@ export function AccountsPage() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <span
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
+              className="icon-bubble font-bold"
               style={{ color, background: `color-mix(in srgb, ${color} 15%, transparent)` }}
               aria-hidden
             >
@@ -104,9 +104,9 @@ export function AccountsPage() {
           <Money cents={sum(cash)} className="mt-2 block text-4xl font-semibold tracking-tight" />
           <p className="mt-2 text-xs text-muted">{cash.length} conta(s) ativa(s)</p>
         </div>
-        <div className="card p-6">
+        <div className="hero-soft">
           <p className="eyebrow">Benefícios · uso restrito</p>
-          <Money cents={sum(benefits)} className="mt-2 block text-4xl font-semibold tracking-tight text-muted" />
+          <Money cents={sum(benefits)} className="mt-2 block text-4xl font-semibold tracking-tight" />
           <p className="mt-2 text-xs text-muted">Controlados à parte, fora do saldo livre</p>
         </div>
       </div>

@@ -78,7 +78,7 @@ export function HomePage() {
   const committedPct = bank > 0 ? Math.min(100, Math.round((committed / bank) * 100)) : committed > 0 ? 100 : 0;
 
   return (
-    <div className="space-y-8">
+    <div className="stagger space-y-8">
       {/* Cabeçalho */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -156,12 +156,12 @@ export function HomePage() {
         {/* Barra de comprometimento */}
         <div className="mt-8">
           <div
-            className="flex h-2 overflow-hidden rounded-full bg-surface-2"
+            className="flex h-2.5 overflow-hidden rounded-full bg-white/10"
             role="img"
             aria-label={`${committedPct}% do saldo já comprometido`}
           >
-            <div className="h-full bg-expense glow-dot-expense transition-all" style={{ width: `${committedPct}%` }} />
-            <div className="h-full flex-1 bg-income/80" style={{ opacity: free > 0 ? 1 : 0 }} />
+            <div className="bar-expense h-full rounded-full transition-all duration-700" style={{ width: `${committedPct}%` }} />
+            <div className="bar-income ml-1 h-full flex-1 rounded-full" style={{ opacity: free > 0 ? 1 : 0 }} />
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
             <span className="flex items-center gap-2">
@@ -180,13 +180,13 @@ export function HomePage() {
             </span>
           </div>
           {free < 0 && (
-            <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-expense/10 px-3 py-1 text-xs font-semibold text-expense">
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-expense/15 px-3 py-1 text-xs font-semibold text-expense">
               <IconAlert width={14} height={14} /> Atenção: as obrigações superam o saldo em <Money cents={-free} />
             </p>
           )}
         </div>
 
-        <div className="mt-6 grid gap-4 border-t border-line/70 pt-5 text-sm sm:grid-cols-[1fr_auto] sm:items-end">
+        <div className="mt-6 grid gap-4 border-t border-white/10 pt-5 text-sm sm:grid-cols-[1fr_auto] sm:items-end">
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             <div>
               <p className="eyebrow">Projetado em {formatDate(period.end)}</p>
@@ -205,13 +205,13 @@ export function HomePage() {
               </div>
             )}
           </div>
-          <button className="btn-ghost btn-sm justify-self-start sm:justify-self-end" onClick={() => setShowScenario((v) => !v)} aria-expanded={showScenario}>
+          <button className="pill-action justify-self-start sm:justify-self-end" onClick={() => setShowScenario((v) => !v)} aria-expanded={showScenario}>
             {showScenario ? 'Fechar cenário' : 'Ajustar cenário'}
           </button>
         </div>
 
         {showScenario && (
-          <div className="mt-4 grid gap-2 rounded-2xl border border-line/70 bg-surface-2/50 p-4 sm:grid-cols-3">
+          <div className="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 sm:grid-cols-3">
             <Toggle checked={forecastExpenses} onChange={setForecastExpenses} label="Descontar despesas previstas" />
             <Toggle checked={pendingIncome} onChange={setPendingIncome} label="Somar receitas pendentes" description="Confirmadas, ainda não recebidas" />
             <Toggle checked={forecastIncome} onChange={setForecastIncome} label="Somar receitas previstas" description="Ainda incertas" />
@@ -307,12 +307,14 @@ function FlowCard({
   alert?: React.ReactNode;
 }) {
   const color = tone === 'income' ? 'text-income glow-income' : 'text-expense glow-expense';
-  const dot = tone === 'income' ? 'bg-income glow-dot-income' : 'bg-expense glow-dot-expense';
+  const tint = tone === 'income' ? 'rgb(var(--income))' : 'rgb(var(--expense))';
   return (
     <section className="card" aria-label={`${title} do período`}>
-      <div className="flex items-center gap-2">
-        <span className={`dot ${dot}`} />
-        <h2 className="text-sm font-semibold">{title}</h2>
+      <div className="flex items-center gap-3">
+        <span className="icon-bubble h-10 w-10" style={{ color: tint, background: `color-mix(in srgb, ${tint} 14%, transparent)` }} aria-hidden>
+          {tone === 'income' ? '↙' : '↗'}
+        </span>
+        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
       </div>
       <p className="eyebrow mt-4">{mainLabel}</p>
       <Money cents={main} className={`mt-1 block text-2xl font-semibold tracking-tight ${color}`} />

@@ -9,7 +9,7 @@ export function applyTheme(theme: Theme) {
   }
   const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', dark);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0a0b0e' : '#f6f7f9');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#100c0a' : '#fcf7f1');
 }
 
 export function useApplyTheme(theme: Theme | undefined) {

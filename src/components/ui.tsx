@@ -48,7 +48,7 @@ export function Modal({
         e.preventDefault();
         onClose();
       }}
-      className={`m-0 mt-auto w-full max-w-none rounded-t-3xl border border-line/80 bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/60 sm:m-auto sm:rounded-3xl ${
+      className={`m-0 mt-auto w-full max-w-none rounded-t-[2rem] border border-line/80 bg-surface p-0 text-fg shadow-2xl sm:m-auto sm:rounded-[2rem] ${
         wide ? 'sm:max-w-2xl' : 'sm:max-w-lg'
       }`}
     >
@@ -150,7 +150,7 @@ export function Spinner({ label = 'Carregando…' }: { label?: string }) {
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="rounded-2xl border border-dashed border-line px-6 py-10 text-center">
-      <span className="dot mx-auto mb-3 block h-1.5 w-1.5 bg-accent glow-dot-accent" aria-hidden />
+      <span className="mx-auto mb-3 block h-8 w-8 rounded-full bg-sunset opacity-80 blur-[1px]" aria-hidden />
       <p className="text-sm font-medium">{title}</p>
       {children && <div className="mt-2 text-sm text-muted">{children}</div>}
     </div>
