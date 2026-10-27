@@ -7,6 +7,7 @@ import { useApplyTheme } from '@/hooks/useTheme';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Spinner, ToastProvider } from '@/components/ui';
 import { AppLayout } from '@/components/AppLayout';
+import { Ambient } from '@/components/Ambient';
 import { TxActionsProvider } from '@/features/transactions/TxActions';
 import { HomePage } from '@/pages/HomePage';
 import { TransactionsPage } from '@/pages/TransactionsPage';
@@ -77,9 +78,17 @@ function Gate() {
 }
 
 export function App() {
-  if (!isSupabaseConfigured) return <SetupRequiredPage />;
+  if (!isSupabaseConfigured) {
+    return (
+      <>
+        <Ambient />
+        <SetupRequiredPage />
+      </>
+    );
+  }
   return (
     <QueryClientProvider client={queryClient}>
+      <Ambient />
       <AuthProvider>
         <ToastProvider>
           <BrowserRouter>

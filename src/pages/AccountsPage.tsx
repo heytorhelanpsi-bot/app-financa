@@ -66,7 +66,7 @@ export function AccountsPage() {
             {formatDate(a.opening_date)}
           </p>
         </div>
-        <div className="-mx-1 flex flex-wrap gap-1 border-t border-line/70 pt-3">
+        <div className="-mx-1 flex flex-wrap gap-1 border-t border-fg/10 pt-3">
           <Link className="btn-ghost btn-sm" to={`/movimentacoes?conta=${a.id}`}>Histórico</Link>
           {a.is_active && (
             <>
@@ -100,6 +100,8 @@ export function AccountsPage() {
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <div className="hero p-6">
+          <div className="hero-sun" aria-hidden />
+          <div className="hero-sheen" aria-hidden />
           <p className="eyebrow">Dinheiro em contas</p>
           <Money cents={sum(cash)} className="mt-2 block text-4xl font-semibold tracking-tight" />
           <p className="mt-2 text-xs text-muted">{cash.length} conta(s) ativa(s)</p>

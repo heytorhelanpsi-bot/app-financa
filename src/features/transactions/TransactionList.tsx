@@ -106,7 +106,7 @@ export function GroupedTransactionList({
       {groups.map(([date, items]) => (
         <section key={date}>
           <h3 className="eyebrow mb-2 px-1">{formatDayHeader(date, today)}</h3>
-          <ul className="card-flat divide-y divide-line/60 overflow-hidden">
+          <ul className="card-flat divide-y divide-fg/5 overflow-hidden">
             {items.map((t) => (
               <TransactionRow
                 key={t.id}

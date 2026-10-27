@@ -118,7 +118,7 @@ export function TransactionsPage() {
       {/* Mês e totais */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         {status !== 'overdue' ? (
-          <div className="inline-flex items-center gap-1 rounded-xl border border-line/70 bg-surface p-1">
+          <div className="glass inline-flex items-center gap-1 rounded-full p-1">
             <button className="btn-ghost h-8 w-8 px-0" onClick={() => setMonth(addMonths(month, -1))} aria-label="Mês anterior">
               <IconLeft width={18} height={18} />
             </button>
@@ -131,11 +131,11 @@ export function TransactionsPage() {
           <span className="text-sm font-semibold text-expense">Todos os lançamentos vencidos</span>
         )}
         <div className="flex gap-2 text-sm">
-          <span className="flex items-center gap-2 rounded-xl border border-line/70 bg-surface px-3 py-2">
+          <span className="glass flex items-center gap-2 rounded-full px-4 py-2">
             <span className="dot bg-income glow-dot-income" />
             <Money cents={totals.income} className="font-semibold text-income" />
           </span>
-          <span className="flex items-center gap-2 rounded-xl border border-line/70 bg-surface px-3 py-2">
+          <span className="glass flex items-center gap-2 rounded-full px-4 py-2">
             <span className="dot bg-expense glow-dot-expense" />
             <Money cents={totals.expense} className="font-semibold text-expense" />
           </span>

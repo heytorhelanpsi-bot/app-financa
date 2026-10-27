@@ -411,7 +411,7 @@ function DetailsDialog({ tx, onClose, api }: { tx: Transaction | null; onClose: 
         )}
       </div>
 
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-1 rounded-2xl border border-line/70 px-4 py-2 text-sm sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-1 rounded-2xl border border-fg/10 px-4 py-2 text-sm sm:grid-cols-2">
         {rows.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-3 py-2">
             <dt className="text-muted">{k}</dt>

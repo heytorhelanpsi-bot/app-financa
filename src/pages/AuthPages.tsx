@@ -8,14 +8,6 @@ import { useAuth } from '@/hooks/useAuth';
 function AuthShell({ title, children, footer }: { title: string; children: ReactNode; footer?: ReactNode }) {
   return (
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[10%] h-80 w-80 -translate-x-1/2 rounded-full bg-sunset opacity-40 blur-[120px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-[70%] top-[45%] h-56 w-56 -translate-x-1/2 rounded-full bg-[#EA6113] opacity-20 blur-[110px]"
-      />
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <Logo compact size={56} />

@@ -124,6 +124,8 @@ export function HomePage() {
 
       {/* Saldo em destaque */}
       <section className="hero" aria-label="Saldos">
+        <div className="hero-sun" aria-hidden />
+        <div className="hero-sheen" aria-hidden />
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <p className="eyebrow">Saldo bancário atual</p>
@@ -318,7 +320,7 @@ function FlowCard({
       </div>
       <p className="eyebrow mt-4">{mainLabel}</p>
       <Money cents={main} className={`mt-1 block text-2xl font-semibold tracking-tight ${color}`} />
-      <dl className="mt-4 space-y-2.5 border-t border-line/70 pt-4 text-sm">
+      <dl className="mt-4 space-y-2.5 border-t border-fg/10 pt-4 text-sm">
         {rows.map(([label, cents, cls, dotCls]) => (
           <div key={label} className="flex items-center justify-between gap-3">
             <dt className="flex items-center gap-2 text-muted">
@@ -366,7 +368,7 @@ function UpcomingList({
       {items.length === 0 ? (
         <EmptyState title={empty} />
       ) : (
-        <ul className="card-flat divide-y divide-line/60 overflow-hidden">
+        <ul className="card-flat divide-y divide-fg/5 overflow-hidden">
           {items.slice(0, 12).map((t) => (
             <TransactionRow
               key={t.id}

@@ -81,7 +81,7 @@ export function CategoryManager() {
         Categorias em uso não podem ser excluídas — desative-as para preservar o histórico. “Essencial” ajudará a sugerir a
         ordem de pagamento (Fase 2).
       </p>
-      <ul className="divide-y divide-line/60">
+      <ul className="divide-y divide-fg/5">
         {roots.flatMap((r, i) => {
           const children = visible.filter((c) => c.parent_id === r.id);
           return [row(r, roots, i), ...children.map((c, j) => row(c, children, j, true))];

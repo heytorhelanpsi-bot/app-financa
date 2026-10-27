@@ -77,7 +77,7 @@ export function AppLayout() {
   return (
     <div className="min-h-dvh lg:flex">
       {/* Menu lateral (desktop) */}
-      <aside className="glass sticky top-0 hidden h-dvh w-64 shrink-0 flex-col rounded-none border-y-0 border-l-0 px-4 py-6 lg:flex">
+      <aside className="glass sticky top-4 m-4 mr-0 hidden h-[calc(100dvh-2rem)] w-64 shrink-0 flex-col rounded-[2rem] px-4 py-6 lg:flex">
         <div className="mb-8 px-2">
           <Logo />
         </div>
@@ -95,7 +95,7 @@ export function AppLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between bg-bg/70 px-4 py-3 backdrop-blur-xl lg:hidden">
+        <header className="glass sticky top-3 z-20 mx-3 mt-3 flex items-center justify-between rounded-full py-2 pl-2 pr-2.5 lg:hidden">
           <Logo />
           <SyncIndicator />
         </header>
@@ -111,7 +111,7 @@ export function AppLayout() {
         aria-label="Principal"
         style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#1a1411]/90 p-1.5 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+        <div className="glass-smoke flex items-center gap-1 rounded-full p-1.5">
           {NAV.filter((n) => MOBILE_PRIMARY.includes(n.to))
             .slice(0, 2)
             .map((item) => (

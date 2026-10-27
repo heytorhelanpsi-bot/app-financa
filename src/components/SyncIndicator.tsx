@@ -25,7 +25,7 @@ export function SyncIndicator({ compact }: { compact?: boolean }) {
         : LABEL[state];
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full border border-line/70 bg-surface/60 px-2.5 py-1 text-[11px] font-medium text-muted"
+      className="glass inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-medium text-muted"
       title={title}
       role="status"
       aria-label={title}

@@ -48,7 +48,7 @@ export function Modal({
         e.preventDefault();
         onClose();
       }}
-      className={`m-0 mt-auto w-full max-w-none rounded-t-[2rem] border border-line/80 bg-surface p-0 text-fg shadow-2xl sm:m-auto sm:rounded-[2rem] ${
+      className={`glass m-0 mt-auto w-full max-w-none overflow-visible rounded-t-[2rem] bg-surface/60 p-0 text-fg sm:m-auto sm:rounded-[2rem] ${
         wide ? 'sm:max-w-2xl' : 'sm:max-w-lg'
       }`}
     >
@@ -65,7 +65,7 @@ export function Modal({
           </header>
           <div className="overflow-y-auto px-6 pb-5 pt-2">{children}</div>
           {footer && (
-            <footer className="flex justify-end gap-2 border-t border-line/70 px-6 py-4 pb-safe [&>button]:min-w-[7rem]">{footer}</footer>
+            <footer className="flex justify-end gap-2 border-t border-fg/10 px-6 py-4 pb-safe [&>button]:min-w-[7rem]">{footer}</footer>
           )}
         </div>
       )}
@@ -149,7 +149,7 @@ export function Spinner({ label = 'Carregando…' }: { label?: string }) {
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line px-6 py-10 text-center">
+    <div className="card px-6 py-10 text-center">
       <span className="mx-auto mb-3 block h-8 w-8 rounded-full bg-sunset opacity-80 blur-[1px]" aria-hidden />
       <p className="text-sm font-medium">{title}</p>
       {children && <div className="mt-2 text-sm text-muted">{children}</div>}
@@ -302,7 +302,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.slice(-2).map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex max-w-md items-center gap-2.5 rounded-full border border-line/80 bg-surface/95 px-4 py-2.5 text-sm text-fg shadow-xl backdrop-blur"
+            className="glass pointer-events-auto flex max-w-md items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-fg"
           >
             <span className={`dot ${t.tone === 'error' ? 'bg-expense glow-dot-expense' : 'bg-income glow-dot-income'}`} aria-hidden />
             {t.tone === 'error' && <strong className="text-expense">Erro: </strong>}
